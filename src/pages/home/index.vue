@@ -299,9 +299,9 @@ function cardStyle(egg: EggOption) {
   z-index: 0;
   width: 100%;
   height: 100%;
-  opacity: 0.9;
+  opacity: 1;
   transform: scale(1.06);
-  filter: saturate(1.05) contrast(1.02);
+  filter: saturate(1.18) contrast(1.12) brightness(0.92);
 }
 
 .hero-vignette {
@@ -309,8 +309,9 @@ function cardStyle(egg: EggOption) {
   z-index: 1;
   inset: 0;
   background:
-    linear-gradient(90deg, rgba(255, 255, 255, 0.88) 0%, rgba(255, 255, 255, 0.5) 34%, rgba(255, 255, 255, 0.03) 70%, rgba(255, 255, 255, 0.46) 100%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.58) 0%, rgba(255, 255, 255, 0.04) 42%, rgba(255, 255, 255, 0.76) 100%);
+    linear-gradient(90deg, rgba(255, 255, 255, 0.78) 0%, rgba(255, 255, 255, 0.36) 34%, rgba(16, 27, 42, 0.1) 70%, rgba(16, 27, 42, 0.34) 100%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.42) 0%, rgba(16, 27, 42, 0.06) 42%, rgba(16, 27, 42, 0.28) 100%),
+    radial-gradient(circle at 66% 35%, rgba(255, 255, 255, 0), rgba(14, 24, 38, 0.36) 88%);
   pointer-events: none;
 }
 
@@ -484,9 +485,9 @@ function cardStyle(egg: EggOption) {
 
 .section-heading {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
-  gap: 20rpx;
+  gap: 16rpx;
 }
 
 .section-title {
@@ -497,11 +498,13 @@ function cardStyle(egg: EggOption) {
 }
 
 .section-note {
-  max-width: 330rpx;
+  min-width: 0;
+  flex: 1;
   color: #7a8494;
-  font-size: 22rpx;
+  font-size: 21rpx;
   line-height: 1.35;
   text-align: right;
+  white-space: nowrap;
 }
 
 .egg-grid {
