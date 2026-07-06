@@ -36,10 +36,22 @@
 
       <view class="panel">
         <text class="panel-title">进化路线</text>
-        <view v-for="stage in evolutionStages" :key="stage.id" class="stage-row" :class="{ active: progress.growth >= stage.threshold }">
-          <view class="stage-dot" />
+        <view
+          v-for="stage in evolutionStages"
+          :key="stage.id"
+          class="stage-row"
+          :class="{ active: progress.growth >= stage.threshold, current: petStore.stage.id === stage.id }"
+        >
+          <view class="stage-thumb-wrap">
+            <image class="stage-thumb" :src="getPetStageAssetPath(progress.eggId, stage.id)" mode="aspectFill" />
+            <view class="stage-dot" />
+          </view>
           <view class="stage-copy">
-            <text class="stage-name">{{ stage.name }}</text>
+            <view class="stage-title-row">
+              <text class="stage-name">{{ stage.name }}</text>
+              <text v-if="petStore.stage.id === stage.id" class="stage-badge">当前</text>
+              <text v-else-if="progress.growth >= stage.threshold" class="stage-badge unlocked">已解锁</text>
+            </view>
             <text class="stage-desc">{{ stage.threshold }} 成长值 · {{ stage.description }}</text>
           </view>
         </view>
@@ -66,7 +78,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import PetAvatar from "@/components/PetAvatar.vue";
-import { EVOLUTION_STAGES } from "@/domain/pet";
+import { EVOLUTION_STAGES, getPetStageAssetPath } from "@/domain/pet";
 import { usePetStore } from "@/stores/pet";
 
 const petStore = usePetStore();
@@ -231,10 +243,46 @@ function confirmReset() {
   border-top: 0;
 }
 
+.stage-row {
+  align-items: flex-start;
+}
+
+.stage-thumb-wrap {
+  position: relative;
+  flex: none;
+  width: 112rpx;
+  height: 112rpx;
+}
+
+.stage-thumb {
+  width: 112rpx;
+  height: 112rpx;
+  border: 1rpx solid #e4ece6;
+  border-radius: 18rpx;
+  background: #eef4ef;
+  filter: grayscale(0.18) saturate(0.85);
+}
+
+.stage-row.active .stage-thumb {
+  border-color: rgba(47, 133, 90, 0.38);
+  filter: saturate(1.06);
+  box-shadow: 0 10rpx 24rpx rgba(47, 133, 90, 0.13);
+}
+
+.stage-row.current .stage-thumb {
+  border-color: #2f855a;
+  box-shadow:
+    0 12rpx 28rpx rgba(47, 133, 90, 0.18),
+    0 0 0 4rpx rgba(47, 133, 90, 0.1);
+}
+
 .stage-dot {
+  position: absolute;
+  right: -6rpx;
+  bottom: -6rpx;
   width: 24rpx;
   height: 24rpx;
-  margin-top: 8rpx;
+  border: 5rpx solid #ffffff;
   border-radius: 999rpx;
   background: #d8dfd8;
 }
@@ -247,6 +295,12 @@ function confirmReset() {
 .history-row view {
   min-width: 0;
   flex: 1;
+}
+
+.stage-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
 }
 
 .history-photo {
@@ -263,6 +317,21 @@ function confirmReset() {
   color: #203047;
   font-size: 28rpx;
   font-weight: 850;
+}
+
+.stage-badge {
+  flex: none;
+  padding: 4rpx 12rpx;
+  border-radius: 999rpx;
+  background: #2f855a;
+  color: #ffffff;
+  font-size: 20rpx;
+  font-weight: 900;
+}
+
+.stage-badge.unlocked {
+  background: #e9f7ef;
+  color: #2f855a;
 }
 
 .stage-desc,

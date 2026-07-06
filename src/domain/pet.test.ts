@@ -6,6 +6,7 @@ import {
   feedPet,
   getPetAssetPath,
   getPetEggCutoutPath,
+  getPetStageAssetPath,
   getEvolutionStage,
   recordStudySession,
 } from "./pet";
@@ -37,6 +38,10 @@ describe("pet study growth rules", () => {
     expect(getPetAssetPath("windfire", "adult")).toBe("/static/pets/windfire-adult.webp");
     expect(getPetAssetPath("zodiac_dragon", "egg")).toBe("/static/pets/zodiac_dragon-egg.webp");
     expect(getPetEggCutoutPath("windfire")).toBe("/static/pets/windfire-egg-cutout.webp");
+    expect(getPetStageAssetPath("zodiac_dragon", "hatchling")).toBe("/static/pets/zodiac_dragon-hatchling.webp");
+    expect(getPetStageAssetPath("zodiac_dragon", "student")).toBe("/static/pets/zodiac_dragon-student.webp");
+    expect(getPetStageAssetPath("zodiac_dragon", "scholar")).toBe("/static/pets/zodiac_dragon-scholar.webp");
+    expect(getPetStageAssetPath("zodiac_dragon", "guardian")).toBe("/static/pets/zodiac_dragon-adult.webp");
   });
 
   test("rewards focused study by minutes and focus level", () => {

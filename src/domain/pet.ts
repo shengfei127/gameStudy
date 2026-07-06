@@ -567,6 +567,18 @@ export function getPetEggCutoutPath(eggId: EggId) {
   return `/static/pets/${eggId}-egg-cutout.webp`;
 }
 
+export function getPetStageAssetPath(eggId: EggId, stageId: EvolutionStage["id"]) {
+  if (stageId === "egg") {
+    return getPetEggCutoutPath(eggId);
+  }
+
+  if (stageId === "guardian") {
+    return getPetAssetPath(eggId, "adult");
+  }
+
+  return `/static/pets/${eggId}-${stageId}.webp`;
+}
+
 export function getDateKey(date = new Date()) {
   const year = date.getFullYear();
   const month = `${date.getMonth() + 1}`.padStart(2, "0");
