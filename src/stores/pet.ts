@@ -6,6 +6,7 @@ import {
   createInitialProgress,
   feedPet,
   getEggOption,
+  getDateKey,
   getEvolutionProgress,
   getEvolutionStage,
   getNextEvolutionStage,
@@ -44,13 +45,19 @@ export const usePetStore = defineStore("pet", {
       return state.progress ? getEvolutionProgress(state.progress.growth) : 0;
     },
     todayMinutes(state) {
-      const today = new Date();
-      const dateKey = `${today.getFullYear()}-${`${today.getMonth() + 1}`.padStart(2, "0")}-${`${today.getDate()}`.padStart(2, "0")}`;
+      const dateKey = getDateKey();
       return state.progress
         ? state.progress.studyLogs
             .filter((log) => log.dateKey === dateKey)
             .reduce((total, log) => total + log.minutes, 0)
         : 0;
+    },
+    checkedSubjectsToday(state) {
+      const dateKey = getDateKey();
+      const checkedSubjects = state.progress
+        ? state.progress.studyLogs.filter((log) => log.dateKey === dateKey).map((log) => log.subject)
+        : [];
+      return Array.from(new Set(checkedSubjects));
     },
     recentStudyLogs(state) {
       return state.progress ? state.progress.studyLogs.slice(0, 8) : [];

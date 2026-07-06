@@ -26,12 +26,14 @@
               v-for="item in subjects"
               :key="item"
               class="subject-tab"
-              :class="{ selected: subject === item }"
+              :class="{ selected: subject === item, completed: isSubjectChecked(item) }"
               @tap="selectSubject(item)"
             >
-              {{ item }}
+              <text class="subject-name">{{ item }}</text>
+              <text v-if="isSubjectChecked(item)" class="subject-state">已完成</text>
             </view>
           </view>
+          <text class="subject-progress">今日已完成 {{ checkedSubjectsToday.length }}/{{ subjects.length }} 科</text>
         </view>
 
         <view class="field compact-field">
@@ -92,7 +94,7 @@
       </view>
 
       <button class="primary-button" :class="{ ready: canSubmit }" @tap="submitCheckIn">
-        {{ canSubmit ? "完成打卡，领取积分" : "上传照片后打卡" }}
+        {{ submitLabel }}
       </button>
 
       <view class="recent-card">
@@ -128,10 +130,34 @@ const minutes = ref(25);
 const note = ref("");
 const photoPath = ref("");
 const recentLogs = computed(() => petStore.recentStudyLogs);
-const canSubmit = computed(() => Boolean(photoPath.value));
+const checkedSubjectsToday = computed(() => petStore.checkedSubjectsToday);
+const checkedSubjectSet = computed(() => new Set(checkedSubjectsToday.value));
+const selectedSubjectChecked = computed(() => checkedSubjectSet.value.has(subject.value));
+const canSubmit = computed(() => Boolean(photoPath.value) && !selectedSubjectChecked.value);
+const submitLabel = computed(() => {
+  if (selectedSubjectChecked.value) {
+    return `今日${subject.value}已完成`;
+  }
+
+  return canSubmit.value ? "完成打卡，领取积分" : "上传照片后打卡";
+});
 
 function selectSubject(value: StudySubject) {
   subject.value = value;
+  if (isSubjectChecked(value)) {
+    uni.showToast({ title: `今天${value}已经打卡过了`, icon: "none" });
+  }
+}
+
+function isSubjectChecked(value: StudySubject) {
+  return checkedSubjectSet.value.has(value);
+}
+
+function selectFirstAvailableSubject() {
+  const nextSubject = subjects.find((item) => !isSubjectChecked(item));
+  if (nextSubject) {
+    subject.value = nextSubject;
+  }
 }
 
 function adjustMinutes(step: number) {
@@ -178,6 +204,11 @@ function previewPhoto() {
 }
 
 function submitCheckIn() {
+  if (selectedSubjectChecked.value) {
+    uni.showToast({ title: `今天${subject.value}已经打卡过了`, icon: "none" });
+    return;
+  }
+
   if (!photoPath.value) {
     uni.showToast({ title: "请先上传学习照片", icon: "none" });
     return;
@@ -193,6 +224,7 @@ function submitCheckIn() {
     });
     note.value = "";
     photoPath.value = "";
+    selectFirstAvailableSubject();
     uni.showToast({ title: `获得 ${result.reward} 积分`, icon: "none" });
   } catch (error) {
     uni.showToast({ title: error instanceof Error ? error.message : "打卡失败", icon: "none" });
@@ -345,6 +377,11 @@ function clampMinutes(value: number) {
 }
 
 .subject-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rpx;
   height: 78rpx;
   border: 2rpx solid #e0e9e2;
   border-radius: 16rpx;
@@ -352,7 +389,6 @@ function clampMinutes(value: number) {
   color: #42536b;
   font-size: 28rpx;
   font-weight: 900;
-  line-height: 78rpx;
   text-align: center;
 }
 
@@ -360,6 +396,38 @@ function clampMinutes(value: number) {
   border-color: #2f855a;
   background: #eaf7ef;
   color: #2f855a;
+}
+
+.subject-tab.completed {
+  border-color: #d6e4dc;
+  background: #f1f6f3;
+  color: #7b8a82;
+}
+
+.subject-tab.completed.selected {
+  border-color: #2f855a;
+  background: #eaf7ef;
+  color: #2f855a;
+}
+
+.subject-name {
+  font-size: 28rpx;
+  line-height: 1.05;
+}
+
+.subject-state {
+  color: inherit;
+  font-size: 18rpx;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.subject-progress {
+  display: block;
+  margin-top: 12rpx;
+  color: #6d7b8d;
+  font-size: 22rpx;
+  font-weight: 700;
 }
 
 .compact-field {

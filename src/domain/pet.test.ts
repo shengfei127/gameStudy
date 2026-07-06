@@ -71,12 +71,28 @@ describe("pet study growth rules", () => {
     ).progress;
     const second = recordStudySession(
       first,
-      { subject: "英语", minutes: 20, focusLevel: 2, photoPath: "/tmp/english-b.jpg" },
+      { subject: "数学", minutes: 20, focusLevel: 2, photoPath: "/tmp/math.jpg" },
       new Date("2026-07-06T20:00:00"),
     ).progress;
 
     expect(second.streak).toBe(1);
     expect(second.studyLogs).toHaveLength(2);
+  });
+
+  test("rejects a second check-in for the same subject on the same day", () => {
+    const first = recordStudySession(
+      createInitialProgress("aurora"),
+      { subject: "数学", minutes: 25, focusLevel: 2, photoPath: "/tmp/math-a.jpg" },
+      new Date("2026-07-06T08:00:00"),
+    ).progress;
+
+    expect(() =>
+      recordStudySession(
+        first,
+        { subject: "数学", minutes: 30, focusLevel: 2, photoPath: "/tmp/math-b.jpg" },
+        new Date("2026-07-06T20:00:00"),
+      ),
+    ).toThrow("今天数学已经打卡过了");
   });
 
   test("increments streak on consecutive study days", () => {

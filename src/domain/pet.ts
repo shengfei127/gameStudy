@@ -467,6 +467,15 @@ export function recordStudySession(progress: PetProgress, input: StudyInput, now
   validateStudyInput(input);
 
   const dateKey = getDateKey(now);
+  const subject = input.subject.trim() || "自主学习";
+  const hasCheckedSubjectToday = progress.studyLogs.some(
+    (log) => log.dateKey === dateKey && log.subject === subject,
+  );
+
+  if (hasCheckedSubjectToday) {
+    throw new Error(`今天${subject}已经打卡过了`);
+  }
+
   const reward = calculateStudyReward(input);
   const isSameStudyDay = progress.lastStudyDateKey === dateKey;
   const streak = isSameStudyDay
@@ -477,7 +486,7 @@ export function recordStudySession(progress: PetProgress, input: StudyInput, now
 
   const log: StudyLog = {
     id: `${dateKey}-${now.getTime()}-${progress.studyLogs.length + 1}`,
-    subject: input.subject.trim() || "自主学习",
+    subject,
     minutes: input.minutes,
     focusLevel: input.focusLevel,
     photoPath: input.photoPath.trim(),
