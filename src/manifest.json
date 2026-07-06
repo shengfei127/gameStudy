@@ -1,9 +1,9 @@
 {
-  "name": "GameStudy",
+  "name": "自律伙伴",
   "appid": "",
-  "description": "A uni-app Android starter for GameStudy.",
-  "versionName": "1.0.0",
-  "versionCode": "100",
+  "description": "一款用宠物养成督促学生主动学习的 uni-app 安卓应用。",
+  "versionName": "0.1.0",
+  "versionCode": "10",
   "transformPx": false,
   "app-plus": {
     "usingComponents": true,
@@ -18,7 +18,7 @@
     "modules": {},
     "distribute": {
       "android": {
-        "packagename": "com.example.gamestudy",
+        "packagename": "com.example.studypet",
         "permissions": [
           "<uses-permission android:name=\"android.permission.INTERNET\"/>",
           "<uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\"/>"

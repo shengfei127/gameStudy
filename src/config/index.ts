@@ -1,5 +1,5 @@
 export const appConfig = {
-  name: "GameStudy",
+  name: "自律伙伴",
   apiBaseUrl: import.meta.env.VITE_API_BASE_URL || "",
-  version: "1.0.0",
+  version: "0.1.0",
 };

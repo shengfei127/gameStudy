@@ -3,46 +3,46 @@
     {
       "path": "pages/home/index",
       "style": {
-        "navigationBarTitleText": "GameStudy"
+        "navigationBarTitleText": "自律伙伴"
       }
     },
     {
       "path": "pages/tools/index",
       "style": {
-        "navigationBarTitleText": "Toolkit"
+        "navigationBarTitleText": "学习打卡"
       }
     },
     {
       "path": "pages/profile/index",
       "style": {
-        "navigationBarTitleText": "Profile"
+        "navigationBarTitleText": "成长档案"
       }
     }
   ],
   "tabBar": {
-    "color": "#7a8494",
-    "selectedColor": "#2563eb",
+    "color": "#718096",
+    "selectedColor": "#2f855a",
     "backgroundColor": "#ffffff",
     "borderStyle": "white",
     "list": [
       {
         "pagePath": "pages/home/index",
-        "text": "Home"
+        "text": "伙伴"
       },
       {
         "pagePath": "pages/tools/index",
-        "text": "Tools"
+        "text": "打卡"
       },
       {
         "pagePath": "pages/profile/index",
-        "text": "Mine"
+        "text": "档案"
       }
     ]
   },
   "globalStyle": {
     "navigationBarTextStyle": "black",
-    "navigationBarTitleText": "GameStudy",
+    "navigationBarTitleText": "自律伙伴",
     "navigationBarBackgroundColor": "#ffffff",
-    "backgroundColor": "#f4f7fb"
+    "backgroundColor": "#f2f6f3"
   }
 }
