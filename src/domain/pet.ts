@@ -560,6 +560,10 @@ export function getPetAssetPath(eggId: EggId, variant: "egg" | "adult") {
   return `/static/pets/${eggId}-${variant}.webp`;
 }
 
+export function getPetEggCutoutPath(eggId: EggId) {
+  return `/static/pets/${eggId}-egg-cutout.webp`;
+}
+
 export function getDateKey(date = new Date()) {
   const year = date.getFullYear();
   const month = `${date.getMonth() + 1}`.padStart(2, "0");

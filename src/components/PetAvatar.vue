@@ -46,7 +46,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
-import { EGG_OPTIONS, getPetAssetPath } from "@/domain/pet";
+import { EGG_OPTIONS, getPetAssetPath, getPetEggCutoutPath } from "@/domain/pet";
 import type { EggId, EvolutionStage } from "@/domain/pet";
 
 const props = withDefaults(
@@ -68,7 +68,9 @@ const egg = computed(() => EGG_OPTIONS.find((item) => item.id === props.eggId) |
 const stageClass = computed(() => props.stageId);
 const motifClass = computed(() => `motif-${egg.value.motif}`);
 const imageFailed = ref(false);
-const assetSrc = computed(() => getPetAssetPath(egg.value.id, props.stageId === "egg" ? "egg" : "adult"));
+const assetSrc = computed(() =>
+  props.stageId === "egg" ? getPetEggCutoutPath(egg.value.id) : getPetAssetPath(egg.value.id, "adult"),
+);
 const avatarStyle = computed(
   () =>
     [

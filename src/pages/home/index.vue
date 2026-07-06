@@ -1,5 +1,5 @@
 <template>
-  <view class="page">
+  <view class="page" :style="pageStyle">
     <view v-if="!progress" class="onboarding">
       <view class="fixed-showcase" :style="selectedStyle">
         <image class="hero-backdrop" :src="selectedAdultAsset" mode="aspectFill" />
@@ -52,7 +52,7 @@
               <view class="card-scrim" />
 
               <view class="card-egg-orb">
-                <image class="card-egg-image" :src="getPetAssetPath(egg.id, 'egg')" mode="aspectFit" />
+                <image class="card-egg-image" :src="getPetEggCutoutPath(egg.id)" mode="aspectFit" />
               </view>
 
               <view class="card-copy">
@@ -68,16 +68,23 @@
       </scroll-view>
 
       <view class="action-dock">
-        <button class="primary-button" @tap="startJourney">选择 {{ selectedEgg.name }}，开始孵化</button>
+        <button class="primary-button themed-button" @tap="startJourney">选择 {{ selectedEgg.name }}，开始孵化</button>
       </view>
     </view>
 
     <view v-else class="dashboard">
       <view class="pet-scene" :style="activeStyle">
-        <view class="topline">
-          <view>
+        <image
+          v-if="activeEgg"
+          class="scene-backdrop"
+          :src="getPetAssetPath(activeEgg.id, 'adult')"
+          mode="aspectFill"
+        />
+        <view class="scene-shade" />
+
+        <view class="scene-head">
+          <view class="stage-chip">
             <text class="scene-label">{{ activeStage.name }}</text>
-            <text class="scene-title">{{ displayName }}</text>
           </view>
           <view class="points-pill">
             <text class="points-value">{{ progress.points }}</text>
@@ -85,11 +92,24 @@
           </view>
         </view>
 
-        <view class="avatar-wrap">
-          <PetAvatar :egg-id="progress.eggId" :stage-id="activeStage.id" size="large" />
+        <view class="scene-title-block">
+          <text class="scene-title">{{ displayName }}</text>
+          <text class="stage-description">{{ activeStage.description }}</text>
         </view>
 
-        <text class="stage-description">{{ activeStage.description }}</text>
+        <view class="avatar-stage" :class="{ 'avatar-stage-egg': activeStage.id === 'egg' }">
+          <view class="avatar-halo" />
+          <view class="avatar-crystal">
+            <image
+              v-if="activeStage.id === 'egg'"
+              class="stage-egg-image"
+              :src="getPetEggCutoutPath(progress.eggId)"
+              mode="aspectFit"
+            />
+            <PetAvatar v-else :egg-id="progress.eggId" :stage-id="activeStage.id" size="large" />
+          </view>
+          <view class="avatar-base" />
+        </view>
 
         <view class="progress-block">
           <view class="progress-line">
@@ -120,7 +140,7 @@
       <view class="section">
         <view class="section-heading">
           <text class="section-title">喂养伙伴</text>
-          <text class="section-note">用学习积分换成长值</text>
+          <text class="section-note">积分换成长</text>
         </view>
         <view class="feed-list">
           <view v-for="item in feedItems" :key="item.id" class="feed-row">
@@ -134,7 +154,7 @@
         </view>
       </view>
 
-      <button class="primary-button" @tap="goCheckIn">去学习打卡</button>
+      <button class="primary-button themed-button" @tap="goCheckIn">去学习打卡</button>
     </view>
   </view>
 </template>
@@ -142,7 +162,7 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import PetAvatar from "@/components/PetAvatar.vue";
-import { EGG_OPTIONS, FEED_ITEMS, getEggOption, getPetAssetPath } from "@/domain/pet";
+import { EGG_OPTIONS, FEED_ITEMS, getEggOption, getPetAssetPath, getPetEggCutoutPath } from "@/domain/pet";
 import type { EggId, EggOption, FeedItem } from "@/domain/pet";
 import { usePetStore } from "@/stores/pet";
 
@@ -172,12 +192,14 @@ const activeStage = computed(() => petStore.stage);
 const nextStage = computed(() => petStore.nextStage);
 const selectedEgg = computed(() => getEggOption(selectedEggId.value));
 const selectedAdultAsset = computed(() => getPetAssetPath(selectedEgg.value.id, "adult"));
-const selectedEggAsset = computed(() => getPetAssetPath(selectedEgg.value.id, "egg"));
+const selectedEggAsset = computed(() => getPetEggCutoutPath(selectedEgg.value.id));
 const displayName = computed(() =>
   activeEgg.value && activeStage.value.id === "guardian" ? activeEgg.value.adultName : progress.value?.petName,
 );
 const selectedStyle = computed(() => panelStyle(selectedEgg.value));
 const activeStyle = computed(() => (activeEgg.value ? panelStyle(activeEgg.value) : ""));
+const pageEgg = computed(() => activeEgg.value || selectedEgg.value);
+const pageStyle = computed(() => themeStyle(pageEgg.value));
 
 function selectEgg(eggId: EggId) {
   selectedEggId.value = eggId;
@@ -209,21 +231,110 @@ function goCheckIn() {
 }
 
 function panelStyle(egg: EggOption) {
+  const theme = getEggTheme(egg);
+
   return [
     `--panel-shell:${egg.palette.shell}`,
     `--panel-accent:${egg.palette.accent}`,
     `--panel-glow:${egg.palette.glow}`,
     `--panel-ink:${egg.palette.ink}`,
+    `--theme-dark:${theme.dark}`,
+    `--theme-deep:${theme.deep}`,
+    `--theme-mid:${theme.mid}`,
+    `--theme-light:${theme.light}`,
+    `--theme-hot:${theme.hot}`,
+    `--theme-soft:${theme.soft}`,
+    `--theme-dark-rgb:${hexToRgb(theme.dark)}`,
+    `--theme-deep-rgb:${hexToRgb(theme.deep)}`,
+    `--theme-hot-rgb:${hexToRgb(theme.hot)}`,
   ].join(";");
 }
 
 function cardStyle(egg: EggOption) {
+  const theme = getEggTheme(egg);
+
   return [
     `--card-shell:${egg.palette.shell}`,
     `--card-accent:${egg.palette.accent}`,
     `--card-glow:${egg.palette.glow}`,
     `--card-ink:${egg.palette.ink}`,
+    `--card-dark:${theme.dark}`,
+    `--card-hot:${theme.hot}`,
+    `--card-hot-rgb:${hexToRgb(theme.hot)}`,
   ].join(";");
+}
+
+const THEME_OVERRIDES: Partial<Record<EggId, EggTheme>> = {
+  zodiac_rat: { dark: "#141b2c", deep: "#243148", mid: "#7c8aa5", light: "#eef5ff", hot: "#d8e2f7", soft: "#f6f8fd" },
+  zodiac_ox: { dark: "#102519", deep: "#1f3d2f", mid: "#3c8f68", light: "#edfff3", hot: "#a7f0c1", soft: "#f2fbf5" },
+  zodiac_tiger: { dark: "#2b1008", deep: "#4a2a14", mid: "#f97316", light: "#fff3dc", hot: "#ffb15c", soft: "#fff7ec" },
+  zodiac_rabbit: { dark: "#291724", deep: "#4a2637", mid: "#ef7da8", light: "#fff7fb", hot: "#ffc0d4", soft: "#fff5f8" },
+  zodiac_dragon: { dark: "#082330", deep: "#164052", mid: "#0891b2", light: "#ecfeff", hot: "#67e8f9", soft: "#eefbfc" },
+  zodiac_snake: { dark: "#09251e", deep: "#173d35", mid: "#10a37f", light: "#effff8", hot: "#5eead4", soft: "#effaf6" },
+  zodiac_horse: { dark: "#2b1a0e", deep: "#49301d", mid: "#d97706", light: "#fff6eb", hot: "#fdba74", soft: "#fff7ef" },
+  zodiac_goat: { dark: "#2b2211", deep: "#4b3a20", mid: "#d6a449", light: "#fffaf0", hot: "#fde68a", soft: "#fffaf1" },
+  zodiac_monkey: { dark: "#1f1635", deep: "#352456", mid: "#8b5cf6", light: "#f7f2ff", hot: "#c4b5fd", soft: "#f7f3ff" },
+  zodiac_rooster: { dark: "#35131b", deep: "#4d2430", mid: "#f43f5e", light: "#fff8e5", hot: "#fbbf24", soft: "#fff8ee" },
+  zodiac_dog: { dark: "#111b34", deep: "#25345d", mid: "#4f6fda", light: "#f0f6ff", hot: "#93c5fd", soft: "#f3f7ff" },
+  zodiac_pig: { dark: "#351723", deep: "#542536", mid: "#fb7185", light: "#fff1f4", hot: "#fda4af", soft: "#fff5f7" },
+  windfire: { dark: "#1c0704", deep: "#541c14", mid: "#ef4444", light: "#fff1e7", hot: "#f97316", soft: "#fff4ed" },
+  moonjade: { dark: "#181638", deep: "#2f2b5f", mid: "#818cf8", light: "#f6f7ff", hot: "#c4b5fd", soft: "#f6f5ff" },
+  mechlion: { dark: "#260b0b", deep: "#4a1d1d", mid: "#dc2626", light: "#fff8e6", hot: "#fbbf24", soft: "#fff7e8" },
+  lotusguard: { dark: "#09231f", deep: "#17433d", mid: "#14b8a6", light: "#effffb", hot: "#5eead4", soft: "#effbf8" },
+  aurora: { dark: "#321807", deep: "#4d2c17", mid: "#ff8a4d", light: "#fff4db", hot: "#ffd166", soft: "#fff8e9" },
+  sprout: { dark: "#0c2418", deep: "#1c3f2b", mid: "#31b56a", light: "#ecfff2", hot: "#86efac", soft: "#f0fbf3" },
+  tide: { dark: "#071b35", deep: "#17355e", mid: "#3b82f6", light: "#edf7ff", hot: "#7dd3fc", soft: "#f0f8ff" },
+};
+
+type EggTheme = {
+  dark: string;
+  deep: string;
+  mid: string;
+  light: string;
+  hot: string;
+  soft: string;
+};
+
+function getEggTheme(egg: EggOption): EggTheme {
+  return (
+    THEME_OVERRIDES[egg.id] || {
+      dark: egg.palette.ink,
+      deep: egg.palette.body,
+      mid: egg.palette.accent,
+      light: egg.palette.glow,
+      hot: egg.palette.accent,
+      soft: egg.palette.shell,
+    }
+  );
+}
+
+function themeStyle(egg: EggOption) {
+  const theme = getEggTheme(egg);
+
+  return [
+    `--app-bg:${theme.soft}`,
+    `--app-bg-deep:${theme.light}`,
+    `--button-start:${theme.deep}`,
+    `--button-end:${theme.mid}`,
+    `--button-glow:${theme.hot}`,
+    `--button-glow-rgb:${hexToRgb(theme.hot)}`,
+    `--surface-border-rgb:${hexToRgb(theme.mid)}`,
+    `--surface-tint:${theme.light}`,
+  ].join(";");
+}
+
+function hexToRgb(hex: string) {
+  const normalized = hex.replace("#", "");
+  const value =
+    normalized.length === 3
+      ? normalized
+          .split("")
+          .map((item) => item + item)
+          .join("")
+      : normalized;
+  const number = Number.parseInt(value, 16);
+
+  return `${(number >> 16) & 255}, ${(number >> 8) & 255}, ${number & 255}`;
 }
 </script>
 
@@ -233,9 +344,12 @@ function cardStyle(egg: EggOption) {
   width: 100%;
   max-width: 760rpx;
   min-height: 100vh;
-  overflow: hidden;
+  overflow-x: hidden;
   margin: 0 auto;
   padding: 18rpx 24rpx 0;
+  background:
+    radial-gradient(circle at 24% 0%, var(--app-bg-deep, #f2f6f3), transparent 38%),
+    linear-gradient(180deg, var(--app-bg, #f2f6f3), #f7faf8 56%, var(--app-bg, #f2f6f3));
 }
 
 .onboarding {
@@ -249,8 +363,8 @@ function cardStyle(egg: EggOption) {
 .dashboard {
   display: flex;
   flex-direction: column;
-  gap: 26rpx;
-  padding-bottom: 28rpx;
+  gap: 18rpx;
+  padding-bottom: 112rpx;
 }
 
 .fixed-showcase {
@@ -262,8 +376,8 @@ function cardStyle(egg: EggOption) {
   border-radius: 34rpx;
   background:
     radial-gradient(circle at 24% 20%, rgba(255, 255, 255, 0.96), transparent 23%),
-    radial-gradient(circle at 84% 78%, var(--panel-glow), transparent 34%),
-    linear-gradient(150deg, #fff9f2 0%, var(--panel-shell) 47%, #f4fbf5 100%);
+    radial-gradient(circle at 84% 78%, var(--theme-hot), transparent 34%),
+    linear-gradient(150deg, var(--theme-light) 0%, var(--panel-shell) 47%, var(--theme-soft) 100%);
   box-shadow: 0 24rpx 60rpx rgba(32, 48, 71, 0.12);
   isolation: isolate;
 }
@@ -309,9 +423,9 @@ function cardStyle(egg: EggOption) {
   z-index: 1;
   inset: 0;
   background:
-    linear-gradient(90deg, rgba(255, 255, 255, 0.78) 0%, rgba(255, 255, 255, 0.36) 34%, rgba(16, 27, 42, 0.1) 70%, rgba(16, 27, 42, 0.34) 100%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.42) 0%, rgba(16, 27, 42, 0.06) 42%, rgba(16, 27, 42, 0.28) 100%),
-    radial-gradient(circle at 66% 35%, rgba(255, 255, 255, 0), rgba(14, 24, 38, 0.36) 88%);
+    linear-gradient(90deg, rgba(255, 255, 255, 0.78) 0%, rgba(255, 255, 255, 0.36) 34%, rgba(16, 27, 42, 0.1) 70%, rgba(var(--theme-dark-rgb), 0.42) 100%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.42) 0%, rgba(16, 27, 42, 0.06) 42%, rgba(var(--theme-dark-rgb), 0.46) 100%),
+    radial-gradient(circle at 66% 35%, rgba(255, 255, 255, 0), rgba(var(--theme-deep-rgb), 0.48) 88%);
   pointer-events: none;
 }
 
@@ -411,7 +525,7 @@ function cardStyle(egg: EggOption) {
     linear-gradient(155deg, #ffffff, var(--card-glow, var(--panel-glow)));
   box-shadow:
     inset -8rpx -16rpx 24rpx rgba(32, 48, 71, 0.12),
-    0 14rpx 30rpx rgba(32, 48, 71, 0.16);
+    0 14rpx 30rpx rgba(var(--theme-hot-rgb), 0.18);
 }
 
 .egg-badge-art {
@@ -522,7 +636,7 @@ function cardStyle(egg: EggOption) {
   border: 2rpx solid #e3eadf;
   border-radius: 22rpx;
   background:
-    radial-gradient(circle at 86% 16%, var(--card-glow), transparent 34%),
+    radial-gradient(circle at 86% 16%, var(--card-hot), transparent 34%),
     linear-gradient(160deg, #ffffff, var(--card-shell));
   box-shadow: 0 14rpx 34rpx rgba(32, 48, 71, 0.07);
 }
@@ -631,26 +745,77 @@ function cardStyle(egg: EggOption) {
 .primary-button {
   height: 92rpx;
   border-radius: 18rpx;
-  background: #203047;
+  background: linear-gradient(135deg, var(--button-start, #203047), var(--button-end, #203047));
   color: #ffffff;
   font-size: 30rpx;
   font-weight: 900;
   line-height: 92rpx;
-  box-shadow: 0 18rpx 38rpx rgba(32, 48, 71, 0.18);
+  box-shadow: 0 18rpx 38rpx rgba(var(--button-glow-rgb), 0.32);
 }
 
 .pet-scene {
+  position: relative;
   overflow: hidden;
-  padding: 30rpx;
-  border: 1rpx solid rgba(255, 255, 255, 0.74);
-  border-radius: 30rpx;
+  min-height: 724rpx;
+  padding: 26rpx;
+  border: 1rpx solid rgba(255, 255, 255, 0.62);
+  border-radius: 32rpx;
   background:
-    radial-gradient(circle at 80% 18%, rgba(255, 255, 255, 0.82), transparent 22%),
-    linear-gradient(145deg, var(--panel-glow), var(--panel-shell) 56%, #ffffff 100%);
-  box-shadow: 0 24rpx 60rpx rgba(32, 48, 71, 0.1);
+    radial-gradient(circle at 76% 24%, rgba(255, 255, 255, 0.28), transparent 24%),
+    linear-gradient(150deg, var(--theme-deep) 0%, var(--theme-dark) 46%, #070a10 100%);
+  box-shadow: 0 28rpx 70rpx rgba(var(--theme-dark-rgb), 0.38);
+  color: #ffffff;
+  isolation: isolate;
 }
 
-.topline,
+.scene-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: -3;
+  width: 100%;
+  height: 100%;
+  opacity: 0.66;
+  transform: scale(1.08);
+  filter: saturate(1.28) contrast(1.24) brightness(0.64);
+}
+
+.scene-shade {
+  position: absolute;
+  z-index: -2;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(255, 255, 255, 0.16), transparent 24%),
+    radial-gradient(circle at 50% 58%, rgba(var(--theme-hot-rgb), 0.66), transparent 35%),
+    linear-gradient(180deg, rgba(5, 8, 14, 0.38), rgba(5, 8, 14, 0.94) 78%, rgba(2, 4, 8, 0.98));
+  opacity: 0.92;
+}
+
+.pet-scene::before {
+  position: absolute;
+  right: -120rpx;
+  bottom: -150rpx;
+  z-index: -1;
+  width: 520rpx;
+  height: 520rpx;
+  border: 2rpx solid rgba(255, 255, 255, 0.24);
+  border-radius: 50%;
+  content: "";
+}
+
+.pet-scene::after {
+  position: absolute;
+  top: 166rpx;
+  left: 50%;
+  z-index: -1;
+  width: 560rpx;
+  height: 560rpx;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(var(--theme-hot-rgb), 0.24), rgba(255, 255, 255, 0.08) 34%, transparent 70%);
+  content: "";
+  transform: translateX(-50%);
+}
+
+.scene-head,
 .progress-line {
   display: flex;
   align-items: flex-start;
@@ -658,125 +823,356 @@ function cardStyle(egg: EggOption) {
   gap: 24rpx;
 }
 
+.stage-chip {
+  padding: 10rpx 18rpx;
+  border: 1rpx solid rgba(255, 255, 255, 0.26);
+  border-radius: 999rpx;
+  background: rgba(var(--theme-hot-rgb), 0.24);
+  backdrop-filter: blur(12rpx);
+}
+
 .scene-label {
   display: block;
-  color: #2f855a;
+  color: var(--theme-light);
   font-size: 24rpx;
   font-weight: 900;
 }
 
+.scene-title-block {
+  position: relative;
+  z-index: 1;
+  max-width: 420rpx;
+  margin-top: 28rpx;
+}
+
 .scene-title {
   display: block;
-  margin-top: 6rpx;
-  color: #203047;
-  font-size: 42rpx;
+  color: #ffffff;
+  font-size: 54rpx;
   font-weight: 900;
+  line-height: 1.05;
+  text-shadow: 0 8rpx 20rpx rgba(0, 0, 0, 0.28);
 }
 
 .points-pill {
-  min-width: 132rpx;
-  padding: 12rpx 18rpx;
-  border-radius: 16rpx;
-  background: rgba(255, 255, 255, 0.78);
+  min-width: 126rpx;
+  padding: 14rpx 18rpx;
+  border: 1rpx solid rgba(255, 255, 255, 0.22);
+  border-radius: 22rpx;
+  background: rgba(255, 255, 255, 0.14);
   text-align: center;
+  backdrop-filter: blur(14rpx);
 }
 
 .points-value {
   display: block;
-  color: #203047;
-  font-size: 34rpx;
+  color: #ffffff;
+  font-size: 38rpx;
   font-weight: 900;
 }
 
 .points-label,
-.progress-label,
-.feed-meta {
-  color: #687487;
+.progress-label {
+  color: rgba(255, 255, 255, 0.74);
   font-size: 22rpx;
 }
 
-.avatar-wrap {
+.feed-meta {
+  color: #708093;
+  font-size: 22rpx;
+}
+
+.avatar-stage {
+  position: relative;
   display: flex;
   justify-content: center;
-  padding: 28rpx 0 12rpx;
+  align-items: center;
+  min-height: 430rpx;
+  margin-top: 4rpx;
+  padding: 10rpx 0 0;
+}
+
+.avatar-stage::before {
+  position: absolute;
+  bottom: 22rpx;
+  left: 50%;
+  width: 520rpx;
+  height: 132rpx;
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse at center, rgba(var(--theme-hot-rgb), 0.48), rgba(var(--theme-hot-rgb), 0.16) 46%, transparent 72%);
+  content: "";
+  transform: translateX(-50%);
+}
+
+.avatar-stage::after {
+  position: absolute;
+  top: 6rpx;
+  left: 50%;
+  width: 260rpx;
+  height: 430rpx;
+  border-radius: 44% 44% 52% 52%;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(var(--theme-hot-rgb), 0.28) 38%, transparent 82%);
+  content: "";
+  filter: blur(4rpx);
+  transform: translateX(-50%);
+}
+
+.avatar-halo {
+  position: absolute;
+  top: 10rpx;
+  left: 50%;
+  width: 438rpx;
+  height: 438rpx;
+  border: 1rpx solid rgba(255, 255, 255, 0.18);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 48% 34%, rgba(255, 255, 255, 0.22), transparent 32%),
+    radial-gradient(circle at center, rgba(var(--theme-hot-rgb), 0.3), transparent 64%);
+  box-shadow:
+    inset 0 0 0 28rpx rgba(255, 255, 255, 0.018),
+    0 0 64rpx rgba(var(--theme-hot-rgb), 0.22);
+  transform: translateX(-50%);
+}
+
+.avatar-crystal {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  overflow: hidden;
+  align-items: center;
+  justify-content: center;
+  width: 348rpx;
+  height: 348rpx;
+  border: 2rpx solid rgba(255, 255, 255, 0.34);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 34% 16%, rgba(255, 255, 255, 0.42), transparent 22%),
+    radial-gradient(circle at 50% 78%, rgba(var(--theme-hot-rgb), 0.32), transparent 62%),
+    rgba(255, 255, 255, 0.06);
+  box-shadow:
+    inset 0 0 36rpx rgba(255, 255, 255, 0.14),
+    inset 0 -26rpx 42rpx rgba(0, 0, 0, 0.28),
+    0 28rpx 58rpx rgba(0, 0, 0, 0.36);
+  backdrop-filter: blur(4rpx);
+}
+
+.avatar-crystal::before {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background:
+    radial-gradient(ellipse at 32% 14%, rgba(255, 255, 255, 0.34), transparent 24%),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.14), transparent 36%, rgba(0, 0, 0, 0.12) 100%),
+    linear-gradient(180deg, transparent 62%, rgba(0, 0, 0, 0.28) 100%);
+  content: "";
+  pointer-events: none;
+}
+
+.avatar-crystal::after {
+  position: absolute;
+  z-index: 3;
+  top: 20rpx;
+  left: 58rpx;
+  width: 86rpx;
+  height: 168rpx;
+  border-radius: 999rpx;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.3), transparent);
+  content: "";
+  transform: rotate(18deg);
+}
+
+.avatar-stage-egg .avatar-crystal {
+  width: 360rpx;
+  height: 450rpx;
+  border-color: rgba(255, 255, 255, 0.42);
+  border-radius: 48% 48% 43% 43% / 55% 55% 44% 44%;
+  background:
+    radial-gradient(ellipse at 34% 12%, rgba(255, 255, 255, 0.52), transparent 24%),
+    radial-gradient(ellipse at 50% 78%, rgba(var(--theme-hot-rgb), 0.34), transparent 68%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.12), rgba(var(--theme-hot-rgb), 0.12) 48%, rgba(0, 0, 0, 0.22));
+  box-shadow:
+    inset 0 0 44rpx rgba(255, 255, 255, 0.17),
+    inset 0 -42rpx 58rpx rgba(0, 0, 0, 0.32),
+    0 34rpx 70rpx rgba(0, 0, 0, 0.42),
+    0 0 76rpx rgba(var(--theme-hot-rgb), 0.24);
+}
+
+.avatar-stage-egg .avatar-halo {
+  top: 18rpx;
+  width: 470rpx;
+  height: 470rpx;
+}
+
+.stage-egg-image {
+  position: relative;
+  z-index: 1;
+  width: 116%;
+  height: 116%;
+  filter: saturate(1.12) contrast(1.1) drop-shadow(0 28rpx 34rpx rgba(0, 0, 0, 0.28));
+  transform: translateY(-1%);
+}
+
+.avatar-crystal .pet-avatar {
+  z-index: 1;
+}
+
+.avatar-crystal .pet-avatar.large {
+  width: 100%;
+  height: 100%;
+}
+
+.avatar-stage-egg .pet-avatar.large {
+  width: 360rpx;
+  height: 418rpx;
+}
+
+.avatar-base {
+  position: absolute;
+  bottom: 6rpx;
+  left: 50%;
+  z-index: 0;
+  width: 430rpx;
+  height: 82rpx;
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse at center, rgba(255, 255, 255, 0.3), rgba(var(--theme-hot-rgb), 0.24) 42%, rgba(0, 0, 0, 0.28) 100%);
+  box-shadow:
+    0 18rpx 34rpx rgba(0, 0, 0, 0.3),
+    0 0 42rpx rgba(var(--theme-hot-rgb), 0.22);
+  transform: translateX(-50%);
 }
 
 .stage-description {
   display: block;
-  color: #526073;
+  margin-top: 14rpx;
+  color: rgba(255, 255, 255, 0.76);
   font-size: 26rpx;
   line-height: 1.45;
 }
 
 .progress-block {
-  margin-top: 24rpx;
+  margin-top: 18rpx;
 }
 
 .bar {
   overflow: hidden;
-  height: 18rpx;
+  height: 16rpx;
   margin-top: 14rpx;
   border-radius: 999rpx;
-  background: rgba(255, 255, 255, 0.84);
+  background: rgba(255, 255, 255, 0.18);
 }
 
 .bar-fill {
   height: 100%;
   border-radius: 999rpx;
-  background: linear-gradient(90deg, #2f855a, #65c58c);
+  background: linear-gradient(90deg, var(--theme-hot), var(--theme-mid));
+  box-shadow: 0 0 24rpx rgba(var(--theme-hot-rgb), 0.54);
 }
 
 .stat-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 16rpx;
+  gap: 10rpx;
 }
 
 .stat-card,
 .section {
-  border: 1rpx solid #dfe8df;
-  border-radius: 18rpx;
-  background: #ffffff;
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+  background:
+    radial-gradient(circle at 10% -10%, rgba(var(--button-glow-rgb), 0.3), transparent 42%),
+    radial-gradient(circle at 92% 0%, rgba(var(--surface-border-rgb), 0.18), transparent 38%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.86)),
+    var(--surface-tint, #ffffff);
 }
 
 .stat-card {
-  padding: 22rpx 12rpx;
+  min-height: 120rpx;
+  border: 1rpx solid rgba(var(--surface-border-rgb), 0.34);
+  border-radius: 16rpx;
+  padding: 18rpx 10rpx 16rpx;
   text-align: center;
+  box-shadow:
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.9),
+    0 14rpx 34rpx rgba(var(--surface-border-rgb), 0.14);
+}
+
+.stat-card::before {
+  position: absolute;
+  top: 0;
+  right: 18rpx;
+  left: 18rpx;
+  height: 4rpx;
+  border-radius: 999rpx;
+  background: linear-gradient(90deg, transparent, var(--button-glow), transparent);
+  content: "";
 }
 
 .stat-value {
   display: block;
-  color: #203047;
-  font-size: 36rpx;
+  color: var(--button-start, #203047);
+  font-size: 32rpx;
   font-weight: 900;
 }
 
 .stat-label {
   display: block;
-  margin-top: 6rpx;
+  margin-top: 4rpx;
   color: #687487;
-  font-size: 22rpx;
+  font-size: 21rpx;
 }
 
 .section {
-  padding: 28rpx;
+  border: 1rpx solid rgba(var(--surface-border-rgb), 0.34);
+  border-radius: 18rpx;
+  padding: 24rpx 26rpx;
+  box-shadow:
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.92),
+    0 18rpx 42rpx rgba(var(--surface-border-rgb), 0.16);
+}
+
+.section::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 6rpx;
+  background: linear-gradient(90deg, var(--button-start), var(--button-glow), var(--button-end));
+  content: "";
+  opacity: 0.78;
 }
 
 .feed-list {
-  margin-top: 20rpx;
+  margin-top: 12rpx;
 }
 
 .feed-row {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20rpx;
-  padding: 22rpx 0;
-  border-top: 1rpx solid #edf2ee;
+  gap: 18rpx;
+  padding: 20rpx 0 20rpx 24rpx;
+  border-top: 1rpx solid rgba(var(--surface-border-rgb), 0.16);
 }
 
 .feed-row:first-child {
   border-top: 0;
+}
+
+.feed-row::before {
+  position: absolute;
+  top: 28rpx;
+  bottom: 28rpx;
+  left: 0;
+  width: 7rpx;
+  border-radius: 999rpx;
+  background: linear-gradient(180deg, var(--button-glow), var(--button-end));
+  content: "";
+  opacity: 0.86;
 }
 
 .feed-copy {
@@ -787,31 +1183,34 @@ function cardStyle(egg: EggOption) {
 .feed-name {
   display: block;
   color: #203047;
-  font-size: 30rpx;
+  font-size: 28rpx;
   font-weight: 850;
 }
 
 .feed-desc {
   display: block;
-  margin-top: 8rpx;
+  margin-top: 6rpx;
   color: #687487;
-  font-size: 25rpx;
-  line-height: 1.45;
+  font-size: 23rpx;
+  line-height: 1.38;
 }
 
 .feed-button {
-  width: 132rpx;
-  height: 68rpx;
-  border-radius: 14rpx;
-  background: #203047;
+  width: 118rpx;
+  height: 60rpx;
+  border-radius: 999rpx;
+  background: linear-gradient(135deg, var(--button-start, #203047), var(--button-end, #203047));
   color: #ffffff;
-  font-size: 26rpx;
+  font-size: 24rpx;
   font-weight: 800;
-  line-height: 68rpx;
+  line-height: 60rpx;
+  box-shadow: 0 10rpx 22rpx rgba(var(--button-glow-rgb), 0.24);
 }
 
 .feed-button[disabled] {
-  background: #d8dfd8;
-  color: #8a958c;
+  border: 1rpx solid rgba(var(--surface-border-rgb), 0.16);
+  background: rgba(var(--surface-border-rgb), 0.1);
+  color: rgba(32, 48, 71, 0.42);
+  box-shadow: none;
 }
 </style>

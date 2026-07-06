@@ -5,6 +5,7 @@ import {
   createInitialProgress,
   feedPet,
   getPetAssetPath,
+  getPetEggCutoutPath,
   getEvolutionStage,
   recordStudySession,
 } from "./pet";
@@ -35,6 +36,7 @@ describe("pet study growth rules", () => {
   test("resolves stable project asset paths for realistic pet art", () => {
     expect(getPetAssetPath("windfire", "adult")).toBe("/static/pets/windfire-adult.webp");
     expect(getPetAssetPath("zodiac_dragon", "egg")).toBe("/static/pets/zodiac_dragon-egg.webp");
+    expect(getPetEggCutoutPath("windfire")).toBe("/static/pets/windfire-egg-cutout.webp");
   });
 
   test("rewards focused study by minutes and focus level", () => {
