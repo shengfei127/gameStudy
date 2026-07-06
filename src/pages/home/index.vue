@@ -1,22 +1,28 @@
 <template>
   <view class="page">
     <view v-if="!progress" class="onboarding">
-      <view class="gallery-hero" :style="selectedStyle">
-        <view class="hero-copy">
+      <view class="fixed-showcase" :style="selectedStyle">
+        <image class="hero-backdrop" :src="selectedAdultAsset" mode="aspectFill" />
+        <view class="hero-vignette" />
+
+        <view class="hero-copy hero-copy-main">
           <text class="hero-kicker">成年形态预览</text>
           <text class="hero-title">{{ selectedEgg.adultName }}</text>
-          <text class="hero-subtitle">{{ selectedEgg.archetype }} · {{ selectedEgg.studyStyle }}</text>
+          <text class="hero-subtitle">{{ selectedEgg.archetype }}</text>
+        </view>
+
+        <view class="hero-copy hero-copy-side">
+          <text class="hero-side-label">{{ selectedEgg.studyStyle }}</text>
           <text class="hero-trait">{{ selectedEgg.trait }}</text>
         </view>
 
-        <view class="hero-art">
-          <PetAvatar :egg-id="selectedEgg.id" stage-id="guardian" size="large" />
-          <view class="egg-mini">
-            <PetAvatar :egg-id="selectedEgg.id" stage-id="egg" size="tiny" />
-            <view class="egg-mini-copy">
-              <text class="egg-mini-label">初始蛋</text>
-              <text class="egg-mini-name">{{ selectedEgg.name }}</text>
-            </view>
+        <view class="egg-badge">
+          <view class="egg-badge-art">
+            <image class="egg-image" :src="selectedEggAsset" mode="aspectFit" />
+          </view>
+          <view class="egg-mini-copy">
+            <text class="egg-mini-label">初始蛋</text>
+            <text class="egg-mini-name">{{ selectedEgg.name }}</text>
           </view>
         </view>
       </view>
@@ -26,34 +32,44 @@
         <text class="guide-text">先看成年后的样子，再决定要孵化哪颗蛋。</text>
       </view>
 
-      <view v-for="group in optionGroups" :key="group.key" class="option-section">
-        <view class="section-heading">
-          <text class="section-title">{{ group.title }}</text>
-          <text class="section-note">{{ group.note }}</text>
-        </view>
+      <scroll-view class="egg-scroll" scroll-y enhanced :show-scrollbar="false">
+        <view v-for="group in optionGroups" :key="group.key" class="option-section">
+          <view class="section-heading">
+            <text class="section-title">{{ group.title }}</text>
+            <text class="section-note">{{ group.note }}</text>
+          </view>
 
-        <view class="egg-grid">
-          <view
-            v-for="egg in group.options"
-            :key="egg.id"
-            class="egg-card"
-            :class="{ selected: selectedEggId === egg.id }"
-            :style="cardStyle(egg)"
-            @tap="selectEgg(egg.id)"
-          >
-            <view class="card-art">
-              <PetAvatar :egg-id="egg.id" stage-id="egg" size="tiny" />
-              <view class="evolve-line" />
-              <PetAvatar :egg-id="egg.id" stage-id="guardian" size="tiny" />
+          <view class="egg-grid">
+            <view
+              v-for="egg in group.options"
+              :key="egg.id"
+              class="egg-card"
+              :class="{ selected: selectedEggId === egg.id }"
+              :style="cardStyle(egg)"
+              @tap="selectEgg(egg.id)"
+            >
+              <image class="card-adult-bg" :src="getPetAssetPath(egg.id, 'adult')" mode="aspectFill" />
+              <view class="card-scrim" />
+
+              <view class="card-egg-orb">
+                <image class="card-egg-image" :src="getPetAssetPath(egg.id, 'egg')" mode="aspectFit" />
+              </view>
+
+              <view class="card-copy">
+                <text class="card-name">{{ egg.adultName }}</text>
+                <text class="card-meta">{{ egg.name }}</text>
+                <text class="card-tag">{{ egg.iconLabel }} · {{ egg.studyStyle }}</text>
+              </view>
             </view>
-            <text class="card-name">{{ egg.adultName }}</text>
-            <text class="card-meta">{{ egg.name }}</text>
-            <text class="card-tag">{{ egg.iconLabel }} · {{ egg.studyStyle }}</text>
           </view>
         </view>
-      </view>
 
-      <button class="primary-button" @tap="startJourney">选择 {{ selectedEgg.name }}，开始孵化</button>
+        <view class="scroll-bottom-space" />
+      </scroll-view>
+
+      <view class="action-dock">
+        <button class="primary-button" @tap="startJourney">选择 {{ selectedEgg.name }}，开始孵化</button>
+      </view>
     </view>
 
     <view v-else class="dashboard">
@@ -126,7 +142,7 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import PetAvatar from "@/components/PetAvatar.vue";
-import { EGG_OPTIONS, FEED_ITEMS, getEggOption } from "@/domain/pet";
+import { EGG_OPTIONS, FEED_ITEMS, getEggOption, getPetAssetPath } from "@/domain/pet";
 import type { EggId, EggOption, FeedItem } from "@/domain/pet";
 import { usePetStore } from "@/stores/pet";
 
@@ -155,6 +171,8 @@ const activeEgg = computed(() => (progress.value ? getEggOption(progress.value.e
 const activeStage = computed(() => petStore.stage);
 const nextStage = computed(() => petStore.nextStage);
 const selectedEgg = computed(() => getEggOption(selectedEggId.value));
+const selectedAdultAsset = computed(() => getPetAssetPath(selectedEgg.value.id, "adult"));
+const selectedEggAsset = computed(() => getPetAssetPath(selectedEgg.value.id, "egg"));
 const displayName = computed(() =>
   activeEgg.value && activeStage.value.id === "guardian" ? activeEgg.value.adultName : progress.value?.petName,
 );
@@ -204,72 +222,127 @@ function cardStyle(egg: EggOption) {
     `--card-shell:${egg.palette.shell}`,
     `--card-accent:${egg.palette.accent}`,
     `--card-glow:${egg.palette.glow}`,
+    `--card-ink:${egg.palette.ink}`,
   ].join(";");
 }
 </script>
 
 <style>
 .page {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 760rpx;
   min-height: 100vh;
-  padding: 28rpx;
+  overflow: hidden;
+  margin: 0 auto;
+  padding: 18rpx 24rpx 0;
 }
 
-.onboarding,
+.onboarding {
+  display: flex;
+  height: calc(100vh - 18rpx);
+  min-height: 0;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
 .dashboard {
   display: flex;
   flex-direction: column;
   gap: 26rpx;
+  padding-bottom: 28rpx;
 }
 
-.gallery-hero {
+.fixed-showcase {
   position: relative;
   overflow: hidden;
-  min-height: 620rpx;
-  padding: 36rpx 30rpx 30rpx;
-  border: 1rpx solid rgba(255, 255, 255, 0.74);
-  border-radius: 30rpx;
+  box-sizing: border-box;
+  flex: 0 0 568rpx;
+  border: 1rpx solid rgba(255, 255, 255, 0.8);
+  border-radius: 34rpx;
   background:
-    radial-gradient(circle at 80% 18%, rgba(255, 255, 255, 0.82), transparent 22%),
-    linear-gradient(145deg, var(--panel-glow), var(--panel-shell) 52%, #ffffff 100%);
-  box-shadow: 0 24rpx 60rpx rgba(32, 48, 71, 0.1);
+    radial-gradient(circle at 24% 20%, rgba(255, 255, 255, 0.96), transparent 23%),
+    radial-gradient(circle at 84% 78%, var(--panel-glow), transparent 34%),
+    linear-gradient(150deg, #fff9f2 0%, var(--panel-shell) 47%, #f4fbf5 100%);
+  box-shadow: 0 24rpx 60rpx rgba(32, 48, 71, 0.12);
+  isolation: isolate;
 }
 
-.gallery-hero::before {
+.fixed-showcase::before {
   position: absolute;
-  top: -160rpx;
-  right: -110rpx;
-  width: 380rpx;
-  height: 380rpx;
+  top: -208rpx;
+  right: -112rpx;
+  width: 470rpx;
+  height: 470rpx;
   border: 2rpx solid var(--panel-accent);
   border-radius: 50%;
   content: "";
-  opacity: 0.16;
+  opacity: 0.14;
 }
 
-.gallery-hero::after {
+.fixed-showcase::after {
   position: absolute;
-  bottom: -150rpx;
-  left: -120rpx;
-  width: 340rpx;
-  height: 340rpx;
-  border-radius: 42%;
-  background: var(--panel-accent);
+  bottom: -104rpx;
+  left: -96rpx;
+  width: 420rpx;
+  height: 248rpx;
+  border-radius: 58% 42% 0 0;
+  background: linear-gradient(130deg, var(--panel-accent), transparent 84%);
   content: "";
-  opacity: 0.09;
-  transform: rotate(24deg);
+  opacity: 0.12;
+  transform: rotate(8deg);
+}
+
+.hero-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.9;
+  transform: scale(1.06);
+  filter: saturate(1.05) contrast(1.02);
+}
+
+.hero-vignette {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.88) 0%, rgba(255, 255, 255, 0.5) 34%, rgba(255, 255, 255, 0.03) 70%, rgba(255, 255, 255, 0.46) 100%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.58) 0%, rgba(255, 255, 255, 0.04) 42%, rgba(255, 255, 255, 0.76) 100%);
+  pointer-events: none;
 }
 
 .hero-copy {
-  position: relative;
+  position: absolute;
   z-index: 1;
-  max-width: 520rpx;
+}
+
+.hero-copy-main {
+  top: 34rpx;
+  left: 28rpx;
+  width: 392rpx;
+}
+
+.hero-copy-side {
+  bottom: 24rpx;
+  left: 28rpx;
+  box-sizing: border-box;
+  width: 350rpx;
+  padding: 16rpx 18rpx 18rpx;
+  border: 1rpx solid rgba(255, 255, 255, 0.68);
+  border-radius: 20rpx;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 14rpx 34rpx rgba(32, 48, 71, 0.08);
+  backdrop-filter: blur(12rpx);
 }
 
 .hero-kicker {
   display: inline-flex;
-  padding: 10rpx 16rpx;
+  padding: 10rpx 18rpx;
   border-radius: 999rpx;
-  background: rgba(255, 255, 255, 0.62);
+  background: rgba(255, 255, 255, 0.72);
   color: var(--panel-ink);
   font-size: 22rpx;
   font-weight: 900;
@@ -277,51 +350,80 @@ function cardStyle(egg: EggOption) {
 
 .hero-title {
   display: block;
-  margin-top: 20rpx;
+  margin-top: 18rpx;
   color: #203047;
-  font-size: 52rpx;
+  font-size: 56rpx;
   font-weight: 900;
-  line-height: 1.08;
+  line-height: 1.04;
 }
 
 .hero-subtitle,
+.hero-side-label,
 .hero-trait {
   display: block;
-  color: #526073;
-  font-size: 27rpx;
-  line-height: 1.45;
+  color: #44536a;
+  font-size: 24rpx;
+  line-height: 1.42;
 }
 
 .hero-subtitle {
   margin-top: 14rpx;
-  font-weight: 800;
+  font-weight: 900;
 }
 
 .hero-trait {
-  margin-top: 10rpx;
+  margin-top: 6rpx;
+  font-weight: 700;
 }
 
-.hero-art {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  justify-content: center;
-  margin-top: 24rpx;
+.hero-side-label {
+  color: var(--panel-ink);
+  font-weight: 900;
 }
 
-.egg-mini {
+.egg-badge {
   position: absolute;
-  right: 4rpx;
-  bottom: 4rpx;
+  right: 22rpx;
+  bottom: 22rpx;
+  z-index: 2;
   display: flex;
+  box-sizing: border-box;
   align-items: center;
-  gap: 8rpx;
-  min-width: 218rpx;
-  padding: 8rpx 12rpx 8rpx 6rpx;
+  gap: 12rpx;
+  width: 244rpx;
+  padding: 8rpx 16rpx 8rpx 8rpx;
   border: 1rpx solid rgba(255, 255, 255, 0.78);
   border-radius: 999rpx;
-  background: rgba(255, 255, 255, 0.72);
-  box-shadow: 0 14rpx 32rpx rgba(32, 48, 71, 0.12);
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 18rpx 42rpx rgba(32, 48, 71, 0.16);
+  backdrop-filter: blur(10rpx);
+}
+
+.egg-badge-art,
+.card-egg-orb {
+  overflow: hidden;
+  flex: none;
+  border: 4rpx solid rgba(255, 255, 255, 0.86);
+  background:
+    radial-gradient(ellipse at 34% 18%, rgba(255, 255, 255, 0.98) 0 18%, transparent 34%),
+    radial-gradient(ellipse at 50% 72%, var(--card-accent, var(--panel-accent)) 0%, transparent 72%),
+    linear-gradient(155deg, #ffffff, var(--card-glow, var(--panel-glow)));
+  box-shadow:
+    inset -8rpx -16rpx 24rpx rgba(32, 48, 71, 0.12),
+    0 14rpx 30rpx rgba(32, 48, 71, 0.16);
+}
+
+.egg-badge-art {
+  width: 78rpx;
+  height: 98rpx;
+  border-radius: 50% 50% 46% 46%;
+}
+
+.egg-image,
+.card-egg-image {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
 }
 
 .egg-mini-copy {
@@ -340,7 +442,7 @@ function cardStyle(egg: EggOption) {
   display: block;
   overflow: hidden;
   color: #203047;
-  font-size: 23rpx;
+  font-size: 24rpx;
   font-weight: 900;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -348,9 +450,10 @@ function cardStyle(egg: EggOption) {
 
 .guide-row {
   display: flex;
+  flex: 0 0 auto;
   align-items: center;
   gap: 14rpx;
-  padding: 0 4rpx;
+  padding: 2rpx 4rpx 0;
 }
 
 .guide-dot {
@@ -366,10 +469,17 @@ function cardStyle(egg: EggOption) {
   line-height: 1.4;
 }
 
+.egg-scroll {
+  min-height: 0;
+  flex: 1;
+  overflow: hidden;
+}
+
 .option-section {
   display: flex;
   flex-direction: column;
   gap: 16rpx;
+  margin-bottom: 24rpx;
 }
 
 .section-heading {
@@ -382,7 +492,7 @@ function cardStyle(egg: EggOption) {
 .section-title {
   display: block;
   color: #203047;
-  font-size: 31rpx;
+  font-size: 30rpx;
   font-weight: 900;
 }
 
@@ -397,14 +507,15 @@ function cardStyle(egg: EggOption) {
 .egg-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 16rpx;
+  gap: 14rpx;
 }
 
 .egg-card {
   position: relative;
   overflow: hidden;
-  min-height: 286rpx;
-  padding: 18rpx;
+  box-sizing: border-box;
+  min-height: 232rpx;
+  padding: 18rpx 16rpx 20rpx;
   border: 2rpx solid #e3eadf;
   border-radius: 22rpx;
   background:
@@ -431,25 +542,43 @@ function cardStyle(egg: EggOption) {
   box-shadow: 0 0 0 2rpx var(--card-accent);
 }
 
-.card-art {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8rpx;
-  min-height: 106rpx;
+.card-adult-bg {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 56%;
+  height: 100%;
+  opacity: 0.9;
+  filter: saturate(1.04) drop-shadow(0 18rpx 26rpx rgba(32, 48, 71, 0.16));
 }
 
-.evolve-line {
-  width: 34rpx;
-  height: 3rpx;
-  border-radius: 999rpx;
-  background: var(--card-accent);
-  opacity: 0.46;
+.card-scrim {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.94) 0%, rgba(255, 255, 255, 0.75) 58%, rgba(255, 255, 255, 0.16) 100%),
+    linear-gradient(180deg, transparent 0%, rgba(255, 255, 255, 0.34) 100%);
+}
+
+.card-egg-orb {
+  position: relative;
+  z-index: 1;
+  width: 70rpx;
+  height: 92rpx;
+  border-radius: 50% 50% 45% 45%;
+  transform: rotate(-2deg);
+}
+
+.card-copy {
+  position: relative;
+  z-index: 1;
+  max-width: 218rpx;
+  margin-top: 14rpx;
 }
 
 .card-name {
   display: block;
-  margin-top: 16rpx;
   overflow: hidden;
   color: #203047;
   font-size: 28rpx;
@@ -461,22 +590,39 @@ function cardStyle(egg: EggOption) {
 .card-meta,
 .card-tag {
   display: block;
-  overflow: hidden;
   color: #657084;
   font-size: 22rpx;
   line-height: 1.35;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .card-meta {
+  overflow: hidden;
   margin-top: 6rpx;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .card-tag {
   margin-top: 8rpx;
   color: #3d4b5f;
+  font-size: 21rpx;
   font-weight: 800;
+  white-space: normal;
+}
+
+.scroll-bottom-space {
+  height: 126rpx;
+}
+
+.action-dock {
+  position: fixed;
+  right: 24rpx;
+  bottom: calc(var(--window-bottom) + 18rpx);
+  left: 24rpx;
+  z-index: 12;
+  box-sizing: border-box;
+  max-width: 712rpx;
+  margin: 0 auto;
 }
 
 .primary-button {
@@ -487,6 +633,7 @@ function cardStyle(egg: EggOption) {
   font-size: 30rpx;
   font-weight: 900;
   line-height: 92rpx;
+  box-shadow: 0 18rpx 38rpx rgba(32, 48, 71, 0.18);
 }
 
 .pet-scene {
