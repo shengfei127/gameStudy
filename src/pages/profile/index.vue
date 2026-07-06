@@ -49,6 +49,7 @@
         <text class="panel-title">学习记录</text>
         <view v-if="progress.studyLogs.length === 0" class="empty-log">暂无记录</view>
         <view v-for="log in progress.studyLogs.slice(0, 12)" :key="log.id" class="history-row">
+          <image v-if="log.photoPath" class="history-photo" :src="log.photoPath" mode="aspectFill" />
           <view>
             <text class="history-title">{{ log.subject }} · {{ log.minutes }} 分钟</text>
             <text class="history-note">{{ log.note || "完成了一次学习打卡" }}</text>
@@ -219,6 +220,7 @@ function confirmReset() {
 .stage-row,
 .history-row {
   display: flex;
+  align-items: center;
   gap: 18rpx;
   padding: 20rpx 0;
   border-top: 1rpx solid #edf2ee;
@@ -245,6 +247,14 @@ function confirmReset() {
 .history-row view {
   min-width: 0;
   flex: 1;
+}
+
+.history-photo {
+  flex: none;
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 14rpx;
+  background: #e8efe9;
 }
 
 .stage-name,

@@ -79,6 +79,7 @@ export interface StudyInput {
   subject: string;
   minutes: number;
   focusLevel: FocusLevel;
+  photoPath: string;
   note?: string;
 }
 
@@ -456,6 +457,7 @@ export function calculateStudyReward(input: Pick<StudyInput, "minutes" | "focusL
     subject: "study",
     minutes: input.minutes,
     focusLevel: input.focusLevel,
+    photoPath: "reward-preview",
   });
 
   return input.minutes * 2 + FOCUS_BONUS[input.focusLevel];
@@ -478,6 +480,7 @@ export function recordStudySession(progress: PetProgress, input: StudyInput, now
     subject: input.subject.trim() || "自主学习",
     minutes: input.minutes,
     focusLevel: input.focusLevel,
+    photoPath: input.photoPath.trim(),
     note: input.note?.trim(),
     dateKey,
     reward,
@@ -578,6 +581,10 @@ function validateStudyInput(input: StudyInput) {
 
   if (![1, 2, 3].includes(input.focusLevel)) {
     throw new Error("Focus level must be 1, 2, or 3");
+  }
+
+  if (!input.photoPath.trim()) {
+    throw new Error("请上传学习打卡照片");
   }
 }
 
