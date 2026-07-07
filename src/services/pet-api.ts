@@ -9,6 +9,7 @@ import {
   type PetProgress,
   type StudyInput,
 } from "@/domain/pet";
+import { AUTH_SESSION_STORAGE_KEY, type AuthSession } from "./auth-api";
 
 const PROGRESS_STORAGE_KEY = "study-pet-progress";
 const CLIENT_ID_STORAGE_KEY = "study-pet-client-id";
@@ -280,10 +281,23 @@ async function callLocalProxy<T>(
 function createCloudRequest(storage: StorageAdapter, action: CloudAction, payload: Record<string, unknown>) {
   return {
     action,
-    payload: {
+    payload: createIdentityPayload(storage, payload),
+  };
+}
+
+function createIdentityPayload(storage: StorageAdapter, payload: Record<string, unknown>) {
+  const session = storage.get<AuthSession | null | "">(AUTH_SESSION_STORAGE_KEY);
+
+  if (session && typeof session === "object" && typeof session.token === "string" && session.token) {
+    return {
       ...payload,
-      clientId: getClientId(storage),
-    },
+      authToken: session.token,
+    };
+  }
+
+  return {
+    ...payload,
+    clientId: getClientId(storage),
   };
 }
 

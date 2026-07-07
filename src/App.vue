@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { onLaunch, onShow, onHide } from "@dcloudio/uni-app";
+import { useAuthStore } from "@/stores/auth";
 import { usePetStore } from "@/stores/pet";
 
 onLaunch(() => {
-  const petStore = usePetStore();
-  void petStore.hydrate();
+  void bootApp();
 });
 
 onShow(() => {
@@ -14,6 +14,39 @@ onShow(() => {
 onHide(() => {
   console.log("App Hide");
 });
+
+async function bootApp() {
+  const authStore = useAuthStore();
+  const petStore = usePetStore();
+  const session = await authStore.hydrate();
+
+  if (session) {
+    await petStore.hydrate();
+    redirectAfterBoot("/pages/home/index", true);
+    return;
+  }
+
+  petStore.clearState();
+  redirectAfterBoot("/pages/auth/index", false);
+}
+
+function redirectAfterBoot(url: string, tabPage: boolean) {
+  setTimeout(() => {
+    const pages = getCurrentPages();
+    const currentRoute = pages[pages.length - 1]?.route || "";
+
+    if (`/${currentRoute}` === url || currentRoute === url.replace(/^\//, "")) {
+      return;
+    }
+
+    if (tabPage) {
+      uni.switchTab({ url });
+      return;
+    }
+
+    uni.reLaunch({ url });
+  }, 0);
+}
 </script>
 
 <style>

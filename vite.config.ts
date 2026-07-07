@@ -17,16 +17,13 @@ interface CloudFunctionResponse<T = unknown> {
   message?: string;
 }
 
-interface LocalProgressRecord {
+interface LocalCollectionRecord {
   _id: string;
-  clientId: string;
-  progress: unknown;
-  createdAt: string;
-  updatedAt: string;
+  [key: string]: unknown;
 }
 
-interface LocalProgressFile {
-  records: LocalProgressRecord[];
+interface LocalCollectionFile {
+  records: LocalCollectionRecord[];
 }
 
 type CloudFunctionMain = (event: CloudFunctionEvent) => Promise<CloudFunctionResponse>;
@@ -39,7 +36,7 @@ export default defineConfig({
 });
 
 function studyPetLocalProxy(): Plugin {
-  const dataFile = path.join(projectRoot, ".local-data", "study-pet-progress.json");
+  const dataDir = path.join(projectRoot, ".local-data");
   let invokeCloudFunction: CloudFunctionMain | null = null;
 
   return {
@@ -57,7 +54,7 @@ function studyPetLocalProxy(): Plugin {
 
         try {
           const event = parseCloudFunctionEvent(await readRequestBody(req));
-          invokeCloudFunction ||= loadStudyPetCloudFunction(dataFile);
+          invokeCloudFunction ||= loadStudyPetCloudFunction(dataDir);
           const result = await invokeCloudFunction(event);
           res.end(JSON.stringify(result));
         } catch (error) {
@@ -74,7 +71,7 @@ function studyPetLocalProxy(): Plugin {
   };
 }
 
-function loadStudyPetCloudFunction(dataFile: string): CloudFunctionMain {
+function loadStudyPetCloudFunction(dataDir: string): CloudFunctionMain {
   const require = createRequire(import.meta.url);
   const functionPath = path.join(projectRoot, "uniCloud-alipay", "cloudfunctions", "study-pet", "index.js");
   const globalWithUniCloud = globalThis as typeof globalThis & {
@@ -83,7 +80,7 @@ function loadStudyPetCloudFunction(dataFile: string): CloudFunctionMain {
   const previousUniCloud = globalWithUniCloud.uniCloud;
 
   globalWithUniCloud.uniCloud = {
-    database: () => createLocalUniCloudDatabase(dataFile),
+    database: () => createLocalUniCloudDatabase(dataDir),
   };
 
   try {
@@ -99,21 +96,25 @@ function loadStudyPetCloudFunction(dataFile: string): CloudFunctionMain {
   }
 }
 
-function createLocalUniCloudDatabase(dataFile: string) {
-  const progressCollection = createLocalProgressCollection(dataFile);
+function createLocalUniCloudDatabase(dataDir: string) {
+  const collections = new Map<string, ReturnType<typeof createLocalCollection>>();
 
   return {
     collection(name: string) {
-      if (name !== "study_pet_progress") {
+      if (!["study_pet_progress", "study_pet_users"].includes(name)) {
         throw new Error(`Unsupported local collection: ${name}`);
       }
 
-      return progressCollection;
+      if (!collections.has(name)) {
+        collections.set(name, createLocalCollection(getCollectionFile(dataDir, name)));
+      }
+
+      return collections.get(name);
     },
   };
 }
 
-function createLocalProgressCollection(dataFile: string) {
+function createLocalCollection(dataFile: string) {
   let writeQueue = Promise.resolve();
 
   const withWriteLock = <T>(task: () => Promise<T>) => {
@@ -126,12 +127,12 @@ function createLocalProgressCollection(dataFile: string) {
   };
 
   return {
-    where(query: Partial<LocalProgressRecord>) {
+    where(query: Partial<LocalCollectionRecord>) {
       return {
         limit(count: number) {
           return {
             async get() {
-              const file = await readProgressFile(dataFile);
+              const file = await readCollectionFile(dataFile);
               return {
                 data: file.records.filter((record) => matchesQuery(record, query)).slice(0, count),
               };
@@ -143,9 +144,9 @@ function createLocalProgressCollection(dataFile: string) {
 
     doc(id: string) {
       return {
-        update(patch: Partial<LocalProgressRecord>) {
+        update(patch: Partial<LocalCollectionRecord>) {
           return withWriteLock(async () => {
-            const file = await readProgressFile(dataFile);
+            const file = await readCollectionFile(dataFile);
             const index = file.records.findIndex((record) => record._id === id);
 
             if (index >= 0) {
@@ -153,43 +154,51 @@ function createLocalProgressCollection(dataFile: string) {
                 ...file.records[index],
                 ...patch,
               };
-              await writeProgressFile(dataFile, file);
+              await writeCollectionFile(dataFile, file);
             }
           });
         },
 
         remove() {
           return withWriteLock(async () => {
-            const file = await readProgressFile(dataFile);
+            const file = await readCollectionFile(dataFile);
             const records = file.records.filter((record) => record._id !== id);
 
             if (records.length !== file.records.length) {
-              await writeProgressFile(dataFile, { records });
+              await writeCollectionFile(dataFile, { records });
             }
           });
         },
       };
     },
 
-    add(record: Omit<LocalProgressRecord, "_id">) {
+    add(record: Omit<LocalCollectionRecord, "_id">) {
       return withWriteLock(async () => {
-        const file = await readProgressFile(dataFile);
+        const file = await readCollectionFile(dataFile);
         const id = `local-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
         file.records.push({
           _id: id,
           ...record,
         });
-        await writeProgressFile(dataFile, file);
+        await writeCollectionFile(dataFile, file);
         return { id };
       });
     },
   };
 }
 
-async function readProgressFile(dataFile: string): Promise<LocalProgressFile> {
+function getCollectionFile(dataDir: string, collectionName: string) {
+  if (collectionName === "study_pet_progress") {
+    return path.join(dataDir, "study-pet-progress.json");
+  }
+
+  return path.join(dataDir, "study-pet-users.json");
+}
+
+async function readCollectionFile(dataFile: string): Promise<LocalCollectionFile> {
   try {
     const content = await fs.readFile(dataFile, "utf8");
-    const parsed = JSON.parse(content) as Partial<LocalProgressFile>;
+    const parsed = JSON.parse(content) as Partial<LocalCollectionFile>;
 
     if (Array.isArray(parsed.records)) {
       return { records: parsed.records };
@@ -203,13 +212,13 @@ async function readProgressFile(dataFile: string): Promise<LocalProgressFile> {
   return { records: [] };
 }
 
-async function writeProgressFile(dataFile: string, file: LocalProgressFile) {
+async function writeCollectionFile(dataFile: string, file: LocalCollectionFile) {
   await fs.mkdir(path.dirname(dataFile), { recursive: true });
   await fs.writeFile(dataFile, `${JSON.stringify(file, null, 2)}\n`, "utf8");
 }
 
-function matchesQuery(record: LocalProgressRecord, query: Partial<LocalProgressRecord>) {
-  return Object.entries(query).every(([key, value]) => record[key as keyof LocalProgressRecord] === value);
+function matchesQuery(record: LocalCollectionRecord, query: Partial<LocalCollectionRecord>) {
+  return Object.entries(query).every(([key, value]) => record[key] === value);
 }
 
 function parseCloudFunctionEvent(body: string): CloudFunctionEvent {

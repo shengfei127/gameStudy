@@ -1,0 +1,44 @@
+{
+  "bsonType": "object",
+  "required": ["username", "usernameLower", "passwordSalt", "passwordHash", "createdAt", "updatedAt"],
+  "permission": {
+    "read": false,
+    "create": false,
+    "update": false,
+    "delete": false
+  },
+  "properties": {
+    "_id": {
+      "description": "uniCloud 自动生成的用户 ID"
+    },
+    "username": {
+      "bsonType": "string",
+      "description": "展示用用户名"
+    },
+    "usernameLower": {
+      "bsonType": "string",
+      "description": "小写用户名，用于唯一性查询"
+    },
+    "passwordSalt": {
+      "bsonType": "string",
+      "description": "密码盐值"
+    },
+    "passwordHash": {
+      "bsonType": "string",
+      "description": "密码哈希"
+    },
+    "tokenHash": {
+      "bsonType": "string",
+      "description": "当前登录 token 的哈希"
+    },
+    "createdAt": {
+      "bsonType": "string"
+    },
+    "updatedAt": {
+      "bsonType": "string"
+    },
+    "lastLoginAt": {
+      "bsonType": "string"
+    }
+  }
+}

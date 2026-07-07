@@ -1,7 +1,9 @@
 "use strict";
 
+const crypto = require("crypto");
 const db = uniCloud.database();
 const progressCollection = db.collection("study_pet_progress");
+const usersCollection = db.collection("study_pet_users");
 
 const EGG_NAMES = {
   zodiac_rat: "星籽灵鼠",
@@ -97,26 +99,44 @@ exports.main = async (event) => {
   try {
     const action = event && event.action;
     const payload = (event && event.payload) || {};
-    const clientId = requireClientId(payload.clientId);
+
+    if (action === "register") {
+      return ok(await register(payload));
+    }
+
+    if (action === "login") {
+      return ok(await login(payload));
+    }
+
+    if (action === "getSession") {
+      return ok(await getSession(payload.token));
+    }
+
+    if (action === "logout") {
+      await logout(payload.token);
+      return ok(null);
+    }
+
+    const ownerKey = await resolveOwnerKey(payload);
 
     if (action === "getProgress") {
-      return ok(await getProgress(clientId));
+      return ok(await getProgress(ownerKey));
     }
 
     if (action === "chooseEgg") {
-      return ok(await chooseEgg(clientId, payload.eggId));
+      return ok(await chooseEgg(ownerKey, payload.eggId));
     }
 
     if (action === "checkIn") {
-      return ok(await checkIn(clientId, payload.input));
+      return ok(await checkIn(ownerKey, payload.input));
     }
 
     if (action === "feed") {
-      return ok(await feed(clientId, payload.itemId));
+      return ok(await feed(ownerKey, payload.itemId));
     }
 
     if (action === "resetProgress") {
-      await removeProgress(clientId);
+      await removeProgress(ownerKey);
       return ok(null);
     }
 
@@ -126,9 +146,90 @@ exports.main = async (event) => {
   }
 };
 
+async function register(payload) {
+  const credentials = normalizeCredentials(payload);
+  const existingUser = await getUserByUsername(credentials.usernameLower);
+
+  if (existingUser) {
+    throw new Error("用户名已存在");
+  }
+
+  const now = new Date().toISOString();
+  const passwordSalt = randomToken(16);
+  const token = randomToken(32);
+  const result = await usersCollection.add({
+    username: credentials.username,
+    usernameLower: credentials.usernameLower,
+    passwordSalt,
+    passwordHash: hashPassword(credentials.password, passwordSalt),
+    tokenHash: hashToken(token),
+    createdAt: now,
+    updatedAt: now,
+    lastLoginAt: now,
+  });
+
+  return {
+    token,
+    userId: String(result.id || ""),
+    username: credentials.username,
+  };
+}
+
+async function login(payload) {
+  const credentials = normalizeCredentials(payload);
+  const user = await getUserByUsername(credentials.usernameLower);
+
+  if (!user || user.passwordHash !== hashPassword(credentials.password, user.passwordSalt)) {
+    throw new Error("用户名或密码错误");
+  }
+
+  const token = randomToken(32);
+  const now = new Date().toISOString();
+  await usersCollection.doc(user._id).update({
+    tokenHash: hashToken(token),
+    lastLoginAt: now,
+    updatedAt: now,
+  });
+
+  return createSession(user, token);
+}
+
+async function getSession(token) {
+  const user = await requireUserByToken(token);
+  return createSession(user, token);
+}
+
+async function logout(token) {
+  const user = await getUserByToken(token);
+
+  if (user && user._id) {
+    await usersCollection.doc(user._id).update({
+      tokenHash: "",
+      updatedAt: new Date().toISOString(),
+    });
+  }
+}
+
+function createSession(user, token) {
+  return {
+    token,
+    userId: String(user._id || ""),
+    username: user.username,
+  };
+}
+
 async function getProgress(clientId) {
   const record = await getProgressRecord(clientId);
   return record ? record.progress : null;
+}
+
+async function resolveOwnerKey(payload) {
+  if (payload.authToken) {
+    const user = await requireUserByToken(payload.authToken);
+    return `user:${user._id}`;
+  }
+
+  return requireClientId(payload.clientId);
 }
 
 async function chooseEgg(clientId, eggId) {
@@ -344,6 +445,67 @@ function requireClientId(value) {
   }
 
   return clientId;
+}
+
+function normalizeCredentials(payload) {
+  const username = String((payload && payload.username) || "").trim();
+  const password = String((payload && payload.password) || "");
+
+  if (username.length < 3 || username.length > 20) {
+    throw new Error("用户名需为3-20个字符");
+  }
+
+  if (/\s/.test(username)) {
+    throw new Error("用户名不能包含空格");
+  }
+
+  if (password.length < 6 || password.length > 32) {
+    throw new Error("密码需为6-32个字符");
+  }
+
+  return {
+    username,
+    usernameLower: username.toLowerCase(),
+    password,
+  };
+}
+
+async function getUserByUsername(usernameLower) {
+  const result = await usersCollection.where({ usernameLower }).limit(1).get();
+  return result.data && result.data.length > 0 ? result.data[0] : null;
+}
+
+async function getUserByToken(token) {
+  const cleanToken = String(token || "").trim();
+
+  if (!cleanToken) {
+    return null;
+  }
+
+  const result = await usersCollection.where({ tokenHash: hashToken(cleanToken) }).limit(1).get();
+  return result.data && result.data.length > 0 ? result.data[0] : null;
+}
+
+async function requireUserByToken(token) {
+  const user = await getUserByToken(token);
+
+  if (!user) {
+    throw new Error("登录状态已失效，请重新登录");
+  }
+
+  return user;
+}
+
+function hashPassword(password, salt) {
+  return crypto.createHash("sha256").update(`${salt}:${password}`).digest("hex");
+}
+
+function hashToken(token) {
+  return crypto.createHash("sha256").update(token).digest("hex");
+}
+
+function randomToken(bytes) {
+  return crypto.randomBytes(bytes).toString("hex");
 }
 
 function ok(data) {

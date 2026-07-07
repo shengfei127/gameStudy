@@ -13,7 +13,7 @@
     },
     "clientId": {
       "bsonType": "string",
-      "description": "前端匿名客户端 ID，用于 MVP 阶段关联学习档案"
+      "description": "学习档案所有者标识，登录后使用账号用户 ID，未登录兼容匿名客户端 ID"
     },
     "progress": {
       "bsonType": "object",

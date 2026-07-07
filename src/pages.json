@@ -1,6 +1,13 @@
 {
   "pages": [
     {
+      "path": "pages/auth/index",
+      "style": {
+        "navigationBarTitleText": "登录自律伙伴",
+        "navigationStyle": "custom"
+      }
+    },
+    {
       "path": "pages/home/index",
       "style": {
         "navigationBarTitleText": "自律伙伴"
@@ -16,6 +23,12 @@
       "path": "pages/profile/index",
       "style": {
         "navigationBarTitleText": "成长档案"
+      }
+    },
+    {
+      "path": "pages/mine/index",
+      "style": {
+        "navigationBarTitleText": "我的"
       }
     }
   ],
@@ -36,6 +49,10 @@
       {
         "pagePath": "pages/profile/index",
         "text": "档案"
+      },
+      {
+        "pagePath": "pages/mine/index",
+        "text": "我的"
       }
     ]
   },

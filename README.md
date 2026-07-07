@@ -10,6 +10,7 @@
 - 学习打卡：选择科目、时长、专注程度、上传学习照片和填写备注。
 - 积分规则：学习分钟数按 `分钟 x 2` 计分，专注程度会给额外奖励。
 - 防重复打卡：同一天同一科目只能打卡一次。
+- 账号体系：支持用户名和密码注册/登录，登录后学习档案按账号隔离保存。
 - 喂养规则：消耗积分购买食物，食物转化为宠物成长值。
 - 进化规则：蛋眠期、幼生期、陪读期、进阶期、守护期。
 - 成长档案：展示积分、成长值、连续天数、累计学习小时、进化路线和学习历史。
@@ -60,7 +61,12 @@ VITE_PROGRESS_STORAGE=local
 VITE_PROGRESS_STORAGE=cloud
 ```
 
-然后在 HBuilderX 中关联支付宝云 uniCloud 服务空间，上传 `uniCloud-alipay/cloudfunctions/study-pet` 云函数，并初始化 `uniCloud-alipay/database/study_pet_progress.schema.json`。MVP 阶段使用匿名客户端 ID 关联档案，后续接入账号体系时可把 `clientId` 替换为真实用户 ID。
+然后在 HBuilderX 中关联支付宝云 uniCloud 服务空间，上传 `uniCloud-alipay/cloudfunctions/study-pet` 云函数，并初始化这些云数据库 schema：
+
+- `uniCloud-alipay/database/study_pet_users.schema.json`
+- `uniCloud-alipay/database/study_pet_progress.schema.json`
+
+账号使用用户名和密码注册，云函数会保存密码哈希和当前登录 token 哈希。登录后学习档案按账号用户 ID 隔离，旧的匿名 `clientId` 流程仍保留为本地演示兼容。
 
 外部浏览器调试时可以走本地代理，避免 H5 直接请求云函数时遇到跨域或运行环境差异：
 

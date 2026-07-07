@@ -126,6 +126,12 @@ export const usePetStore = defineStore("pet", {
         this.loading = false;
       }
     },
+    clearState() {
+      this.progress = null;
+      this.lastReward = 0;
+      this.lastMessage = "";
+      this.loading = false;
+    },
     uploadStudyPhoto(tempFilePath: string) {
       return petApi.uploadStudyPhoto(tempFilePath);
     },

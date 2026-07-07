@@ -1,22 +1,8 @@
 import { describe, expect, test } from "vitest";
 import { getEvolutionStage } from "@/domain/pet";
-import { createLocalPetApi, createLocalProxyPetApi, type StorageAdapter } from "./pet-api";
-
-function createMemoryStorage(): StorageAdapter {
-  const storage = new Map<string, unknown>();
-
-  return {
-    get<T>(key: string) {
-      return storage.get(key) as T | undefined;
-    },
-    set(key: string, value: unknown) {
-      storage.set(key, value);
-    },
-    remove(key: string) {
-      storage.delete(key);
-    },
-  };
-}
+import { AUTH_SESSION_STORAGE_KEY } from "./auth-api";
+import { createLocalPetApi, createLocalProxyPetApi } from "./pet-api";
+import { createMemoryStorage } from "./test-storage";
 
 describe("pet api local adapter", () => {
   test("chooses an egg and persists progress through the api boundary", async () => {
@@ -100,6 +86,36 @@ describe("pet api local adapter", () => {
       action: "resetProgress",
       payload: {
         clientId: expect.stringMatching(/^anon-/),
+      },
+    });
+  });
+
+  test("uses the logged-in auth token for proxied pet progress", async () => {
+    const requests: Array<{ body: unknown }> = [];
+    const storage = createMemoryStorage();
+    storage.set(AUTH_SESSION_STORAGE_KEY, {
+      token: "token-abc",
+      userId: "user-abc",
+      username: "studentabc",
+    });
+    const api = createLocalProxyPetApi({
+      storage,
+      baseUrl: "/api/study-pet",
+      fetcher: async (_url, init) => {
+        requests.push({
+          body: JSON.parse(String(init?.body || "{}")),
+        });
+
+        return new Response(JSON.stringify({ success: true, data: null }));
+      },
+    });
+
+    await api.getProgress();
+
+    expect(requests[0].body).toEqual({
+      action: "getProgress",
+      payload: {
+        authToken: "token-abc",
       },
     });
   });
