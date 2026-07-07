@@ -1178,7 +1178,7 @@ function hexToRgb(hex: string) {
   right: 112rpx;
   left: 112rpx;
   z-index: 2;
-  display: block;
+  display: none;
   height: 10rpx;
   border-radius: 999rpx;
   background: rgba(255, 255, 255, 0.26);
@@ -1187,16 +1187,17 @@ function hexToRgb(hex: string) {
 
 .stage-crest {
   position: absolute;
-  top: 38rpx;
+  top: 56rpx;
   left: 50%;
   z-index: 3;
-  width: 62rpx;
-  height: 34rpx;
+  width: 78rpx;
+  height: 28rpx;
   border: 1rpx solid rgba(255, 255, 255, 0.28);
   border-radius: 999rpx;
   background:
     radial-gradient(circle at 50% 46%, rgba(255, 255, 255, 0.72), transparent 34%),
     rgba(var(--egg-accent-rgb, 47, 133, 90), 0.22);
+  opacity: 0.42;
   box-shadow: 0 10rpx 22rpx rgba(15, 23, 42, 0.12);
   transform: translateX(-50%);
 }
@@ -1212,12 +1213,7 @@ function hexToRgb(hex: string) {
 }
 
 .wall-art {
-  top: 72rpx;
-  width: 420rpx;
-  height: 218rpx;
-  border-radius: 28rpx;
-  opacity: 0.18;
-  filter: saturate(0.9) contrast(1) brightness(0.92);
+  display: none;
 }
 
 .stage-haze {
@@ -1242,25 +1238,17 @@ function hexToRgb(hex: string) {
 }
 
 .window-piece {
-  top: 116rpx;
-  left: 104rpx;
-  right: auto;
-  width: 100rpx;
-  height: 108rpx;
+  display: none;
 }
 
 .window-image {
-  width: 96rpx;
-  height: 108rpx;
-  opacity: 0.58;
+  width: 64rpx;
+  height: 76rpx;
+  opacity: 0.72;
 }
 
 .room-shelf {
-  top: 122rpx;
-  right: 104rpx;
-  left: auto;
-  width: 126rpx;
-  height: 74rpx;
+  display: none;
 }
 
 .shelf-image {
@@ -1270,33 +1258,21 @@ function hexToRgb(hex: string) {
 }
 
 .room-desk {
-  right: 108rpx;
-  bottom: 92rpx;
-  z-index: 6;
-  width: 124rpx;
-  height: 90rpx;
-  opacity: 0.64;
-  transform: rotate(-1deg);
+  display: none;
 }
 
 .desk-image {
-  width: 124rpx;
-  height: 90rpx;
+  width: 72rpx;
+  height: 54rpx;
 }
 
 .room-lamp {
-  right: 190rpx;
-  bottom: 164rpx;
-  z-index: 6;
-  width: 64rpx;
-  height: 96rpx;
-  opacity: 0.68;
-  transform: none;
+  display: none;
 }
 
 .lamp-image {
-  width: 64rpx;
-  height: 96rpx;
+  width: 44rpx;
+  height: 68rpx;
 }
 
 .room-lamp.active {
@@ -1322,7 +1298,7 @@ function hexToRgb(hex: string) {
   z-index: 5;
   width: 360rpx;
   height: 132rpx;
-  opacity: 0.4;
+  opacity: 0.24;
   transform: translateX(-50%) perspective(330rpx) rotateX(60deg);
 }
 
