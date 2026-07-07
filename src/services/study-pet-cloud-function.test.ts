@@ -107,6 +107,51 @@ describe("study-pet cloud function auth", () => {
     expect(firstProgress.data.eggId).toBe("windfire");
     expect(secondProgress.data.eggId).toBe("zodiac_dragon");
   });
+
+  test("buys and equips shop items in cloud-backed progress", async () => {
+    const { main } = loadCloudFunction();
+
+    await main({
+      action: "chooseEgg",
+      payload: {
+        clientId: "student-device",
+        eggId: "windfire",
+      },
+    });
+    await main({
+      action: "checkIn",
+      payload: {
+        clientId: "student-device",
+        input: {
+          subject: "英语",
+          minutes: 60,
+          focusLevel: 3,
+          photoPath: "cloud://study/english.jpg",
+        },
+      },
+    });
+
+    const bought = await main({
+      action: "buyShopItem",
+      payload: {
+        clientId: "student-device",
+        itemId: "focus_lamp",
+      },
+    });
+    const equipped = await main({
+      action: "equipShopItem",
+      payload: {
+        clientId: "student-device",
+        itemId: "focus_lamp",
+      },
+    });
+
+    expect(bought.success).toBe(true);
+    expect(bought.data.item.name).toBe("专注台灯");
+    expect(bought.data.progress.points).toBe(52);
+    expect(equipped.success).toBe(true);
+    expect(equipped.data.progress.equippedItems.lamp).toBe("focus_lamp");
+  });
 });
 
 function loadCloudFunction() {

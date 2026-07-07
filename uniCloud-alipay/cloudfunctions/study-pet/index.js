@@ -51,6 +51,269 @@ const FEED_ITEMS = [
   },
 ];
 
+const SHOP_ITEMS = [
+  {
+    id: "flame_headband",
+    category: "outfit",
+    slot: "head",
+    name: "风火额饰",
+    shortName: "额饰",
+    cost: 60,
+    rarity: "common",
+    icon: "火",
+    theme: "#ef4444",
+    accent: "#f97316",
+    description: "适合冲刺日佩戴，给伙伴增加醒目的行动感。",
+  },
+  {
+    id: "scholar_crown",
+    category: "outfit",
+    slot: "head",
+    name: "星辰冠",
+    shortName: "星冠",
+    cost: 120,
+    rarity: "rare",
+    icon: "冠",
+    theme: "#4f46e5",
+    accent: "#facc15",
+    description: "完成阶段复盘后很有仪式感的进阶头饰。",
+  },
+  {
+    id: "cloud_cape",
+    category: "outfit",
+    slot: "back",
+    name: "云纹披风",
+    shortName: "披风",
+    cost: 160,
+    rarity: "rare",
+    icon: "云",
+    theme: "#0891b2",
+    accent: "#67e8f9",
+    description: "让伙伴的守护形态更稳、更有气场。",
+  },
+  {
+    id: "book_pack",
+    category: "outfit",
+    slot: "back",
+    name: "书卷背包",
+    shortName: "书包",
+    cost: 90,
+    rarity: "common",
+    icon: "书",
+    theme: "#7c2d12",
+    accent: "#fdba74",
+    description: "日常学习感最强的收集件，适合基础打卡阶段。",
+  },
+  {
+    id: "ink_brush",
+    category: "outfit",
+    slot: "hand",
+    name: "状元笔",
+    shortName: "状元笔",
+    cost: 80,
+    rarity: "common",
+    icon: "笔",
+    theme: "#1f2937",
+    accent: "#94a3b8",
+    description: "语文和错题整理日的经典装备。",
+  },
+  {
+    id: "focus_staff",
+    category: "outfit",
+    slot: "hand",
+    name: "专注法杖",
+    shortName: "法杖",
+    cost: 180,
+    rarity: "epic",
+    icon: "杖",
+    theme: "#2563eb",
+    accent: "#38bdf8",
+    description: "高专注打卡后的目标装备，强化伙伴的能量表现。",
+  },
+  {
+    id: "morning_aura",
+    category: "outfit",
+    slot: "aura",
+    name: "晨读光环",
+    shortName: "晨光",
+    cost: 140,
+    rarity: "rare",
+    icon: "晨",
+    theme: "#d97706",
+    accent: "#fde68a",
+    description: "适合每天早读坚持后的温暖光效。",
+  },
+  {
+    id: "perfect_aura",
+    category: "outfit",
+    slot: "aura",
+    name: "满分光环",
+    shortName: "满分",
+    cost: 260,
+    rarity: "epic",
+    icon: "满",
+    theme: "#be123c",
+    accent: "#fda4af",
+    description: "高价值收藏，代表一次又一次自觉完成。",
+  },
+  {
+    id: "spark_effect",
+    category: "outfit",
+    slot: "effect",
+    name: "星火粒子",
+    shortName: "星火",
+    cost: 110,
+    rarity: "rare",
+    icon: "星",
+    theme: "#7c3aed",
+    accent: "#c4b5fd",
+    description: "让伙伴周围出现更积极的完成反馈。",
+  },
+  {
+    id: "cloud_effect",
+    category: "outfit",
+    slot: "effect",
+    name: "云雾环绕",
+    shortName: "云雾",
+    cost: 150,
+    rarity: "rare",
+    icon: "雾",
+    theme: "#0f766e",
+    accent: "#99f6e4",
+    description: "低调但高级的陪伴特效，适合长期坚持型学生。",
+  },
+  {
+    id: "forest_wall",
+    category: "room",
+    slot: "wall",
+    name: "森林书屋",
+    shortName: "森林墙",
+    cost: 120,
+    rarity: "rare",
+    icon: "森",
+    theme: "#166534",
+    accent: "#86efac",
+    description: "把伙伴房间变成清新的自习角。",
+  },
+  {
+    id: "dragon_wall",
+    category: "room",
+    slot: "wall",
+    name: "龙宫书阁",
+    shortName: "龙宫墙",
+    cost: 220,
+    rarity: "epic",
+    icon: "龙",
+    theme: "#0e7490",
+    accent: "#67e8f9",
+    description: "更震撼的背景主题，适合高阶伙伴。",
+  },
+  {
+    id: "moon_window",
+    category: "room",
+    slot: "window",
+    name: "月夜窗台",
+    shortName: "月窗",
+    cost: 160,
+    rarity: "rare",
+    icon: "月",
+    theme: "#4338ca",
+    accent: "#c4b5fd",
+    description: "给夜间复盘和阅读一个安静窗口。",
+  },
+  {
+    id: "sunrise_window",
+    category: "room",
+    slot: "window",
+    name: "晨光窗景",
+    shortName: "晨窗",
+    cost: 120,
+    rarity: "common",
+    icon: "日",
+    theme: "#ea580c",
+    accent: "#fed7aa",
+    description: "适合早起打卡的明亮房间件。",
+  },
+  {
+    id: "oak_desk",
+    category: "room",
+    slot: "desk",
+    name: "橡木学习桌",
+    shortName: "橡木桌",
+    cost: 100,
+    rarity: "common",
+    icon: "桌",
+    theme: "#92400e",
+    accent: "#fcd34d",
+    description: "房间核心家具，让学习目标更有落点。",
+  },
+  {
+    id: "focus_lamp",
+    category: "room",
+    slot: "lamp",
+    name: "专注台灯",
+    shortName: "台灯",
+    cost: 80,
+    rarity: "common",
+    icon: "灯",
+    theme: "#ca8a04",
+    accent: "#fef08a",
+    description: "低价但关键的第一件房间装饰。",
+  },
+  {
+    id: "trophy_shelf",
+    category: "room",
+    slot: "decor",
+    name: "奖杯架",
+    shortName: "奖杯",
+    cost: 180,
+    rarity: "epic",
+    icon: "奖",
+    theme: "#b45309",
+    accent: "#fde68a",
+    description: "把连续坚持的成就感摆出来。",
+  },
+  {
+    id: "tomato_clock",
+    category: "room",
+    slot: "decor",
+    name: "番茄钟",
+    shortName: "番茄钟",
+    cost: 70,
+    rarity: "common",
+    icon: "钟",
+    theme: "#dc2626",
+    accent: "#fecaca",
+    description: "适合短时高频学习打卡的房间小物。",
+  },
+  {
+    id: "star_floor",
+    category: "room",
+    slot: "floor",
+    name: "星空地毯",
+    shortName: "星毯",
+    cost: 140,
+    rarity: "rare",
+    icon: "毯",
+    theme: "#312e81",
+    accent: "#a5b4fc",
+    description: "让伙伴舞台底座更有收藏感。",
+  },
+  {
+    id: "cloud_floor",
+    category: "room",
+    slot: "floor",
+    name: "云纹地板",
+    shortName: "云地板",
+    cost: 130,
+    rarity: "rare",
+    icon: "纹",
+    theme: "#0f766e",
+    accent: "#99f6e4",
+    description: "柔和干净的房间地面主题。",
+  },
+];
+
 const EVOLUTION_STAGES = [
   {
     id: "egg",
@@ -133,6 +396,14 @@ exports.main = async (event) => {
 
     if (action === "feed") {
       return ok(await feed(ownerKey, payload.itemId));
+    }
+
+    if (action === "buyShopItem") {
+      return ok(await buyShopItemForOwner(ownerKey, payload.itemId));
+    }
+
+    if (action === "equipShopItem") {
+      return ok(await equipShopItemForOwner(ownerKey, payload.itemId));
     }
 
     if (action === "resetProgress") {
@@ -220,7 +491,7 @@ function createSession(user, token) {
 
 async function getProgress(clientId) {
   const record = await getProgressRecord(clientId);
-  return record ? record.progress : null;
+  return record ? normalizePetProgress(record.progress) : null;
 }
 
 async function resolveOwnerKey(payload) {
@@ -260,6 +531,20 @@ async function feed(clientId, itemId) {
   };
 }
 
+async function buyShopItemForOwner(clientId, itemId) {
+  const progress = requireProgress(await getProgress(clientId));
+  const result = buyShopItem(progress, itemId);
+  await saveProgress(clientId, result.progress);
+  return result;
+}
+
+async function equipShopItemForOwner(clientId, itemId) {
+  const progress = requireProgress(await getProgress(clientId));
+  const result = equipShopItem(progress, itemId);
+  await saveProgress(clientId, result.progress);
+  return result;
+}
+
 function createInitialProgress(eggId) {
   const petName = EGG_NAMES[eggId];
 
@@ -277,6 +562,8 @@ function createInitialProgress(eggId) {
     lastStudyDateKey: "",
     studyLogs: [],
     feedLogs: [],
+    ownedItemIds: [],
+    equippedItems: {},
   };
 }
 
@@ -356,6 +643,71 @@ function feedPet(progress, itemId, now) {
   };
 }
 
+function buyShopItem(progress, itemId) {
+  const item = getShopItem(itemId);
+  const normalized = normalizePetProgress(progress);
+
+  if (normalized.ownedItemIds.includes(item.id)) {
+    throw new Error(`已经拥有${item.name}`);
+  }
+
+  if (normalized.points < item.cost) {
+    throw new Error(`积分不足，无法购买${item.name}`);
+  }
+
+  return {
+    item,
+    progress: {
+      ...normalized,
+      points: normalized.points - item.cost,
+      ownedItemIds: [...normalized.ownedItemIds, item.id],
+    },
+  };
+}
+
+function equipShopItem(progress, itemId) {
+  const item = getShopItem(itemId);
+  const normalized = normalizePetProgress(progress);
+
+  if (!normalized.ownedItemIds.includes(item.id)) {
+    throw new Error(`请先拥有${item.name}`);
+  }
+
+  return {
+    item,
+    progress: {
+      ...normalized,
+      equippedItems: {
+        ...normalized.equippedItems,
+        [item.slot]: item.id,
+      },
+    },
+  };
+}
+
+function getShopItem(itemId) {
+  const item = SHOP_ITEMS.find((candidate) => candidate.id === itemId);
+
+  if (!item) {
+    throw new Error(`Unknown shop item: ${itemId}`);
+  }
+
+  return item;
+}
+
+function normalizePetProgress(progress) {
+  return {
+    ...progress,
+    studyLogs: Array.isArray(progress.studyLogs) ? progress.studyLogs : [],
+    feedLogs: Array.isArray(progress.feedLogs) ? progress.feedLogs : [],
+    ownedItemIds: Array.isArray(progress.ownedItemIds) ? progress.ownedItemIds : [],
+    equippedItems:
+      progress.equippedItems && typeof progress.equippedItems === "object" && !Array.isArray(progress.equippedItems)
+        ? progress.equippedItems
+        : {},
+  };
+}
+
 function calculateStudyReward(input) {
   return input.minutes * 2 + FOCUS_BONUS[input.focusLevel];
 }
@@ -412,10 +764,11 @@ async function getProgressRecord(clientId) {
 async function saveProgress(clientId, progress) {
   const now = new Date().toISOString();
   const record = await getProgressRecord(clientId);
+  const normalized = normalizePetProgress(progress);
 
   if (record && record._id) {
     await progressCollection.doc(record._id).update({
-      progress,
+      progress: normalized,
       updatedAt: now,
     });
     return;
@@ -423,7 +776,7 @@ async function saveProgress(clientId, progress) {
 
   await progressCollection.add({
     clientId,
-    progress,
+    progress: normalized,
     createdAt: now,
     updatedAt: now,
   });

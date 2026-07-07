@@ -1,13 +1,19 @@
 import { describe, expect, test } from "vitest";
 import {
   EGG_OPTIONS,
+  SHOP_ITEMS,
+  buyShopItem,
   calculateStudyReward,
   createInitialProgress,
+  equipShopItem,
   feedPet,
+  getEquippedShopItems,
   getPetAssetPath,
   getPetEggCutoutPath,
   getPetStageAssetPath,
+  getShopItemAssetPath,
   getEvolutionStage,
+  normalizePetProgress,
   recordStudySession,
 } from "./pet";
 
@@ -132,5 +138,62 @@ describe("pet study growth rules", () => {
         photoPath: "",
       }),
     ).toThrow("请上传学习打卡照片");
+  });
+
+  test("starts every new pet with an empty collection and equipment set", () => {
+    const progress = createInitialProgress("windfire");
+
+    expect(progress.ownedItemIds).toEqual([]);
+    expect(progress.equippedItems).toEqual({});
+    expect(SHOP_ITEMS.length).toBeGreaterThanOrEqual(20);
+    expect(getShopItemAssetPath("focus_lamp")).toBe("/static/shop-items/focus_lamp.webp");
+  });
+
+  test("buys a shop item by spending points and adding it to the collection", () => {
+    const progress = { ...createInitialProgress("windfire"), points: 120 };
+    const result = buyShopItem(progress, "focus_lamp");
+
+    expect(result.item.name).toBe("专注台灯");
+    expect(result.progress.points).toBe(40);
+    expect(result.progress.ownedItemIds).toEqual(["focus_lamp"]);
+  });
+
+  test("rejects duplicate purchases and insufficient points", () => {
+    const owned = buyShopItem({ ...createInitialProgress("windfire"), points: 200 }, "focus_lamp").progress;
+
+    expect(() => buyShopItem(owned, "focus_lamp")).toThrow("已经拥有专注台灯");
+    expect(() => buyShopItem({ ...createInitialProgress("windfire"), points: 20 }, "focus_lamp")).toThrow(
+      "积分不足，无法购买专注台灯",
+    );
+  });
+
+  test("equips only owned items and replaces items in the same slot", () => {
+    const progress = {
+      ...createInitialProgress("windfire"),
+      points: 400,
+    };
+    const withLamp = buyShopItem(progress, "focus_lamp").progress;
+    const equippedLamp = equipShopItem(withLamp, "focus_lamp").progress;
+    const withMoonWindow = buyShopItem(equippedLamp, "moon_window").progress;
+    const equippedMoonWindow = equipShopItem(withMoonWindow, "moon_window").progress;
+    const withSunriseWindow = buyShopItem(equippedMoonWindow, "sunrise_window").progress;
+    const equippedSunriseWindow = equipShopItem(withSunriseWindow, "sunrise_window").progress;
+
+    expect(() => equipShopItem(progress, "focus_lamp")).toThrow("请先拥有专注台灯");
+    expect(equippedLamp.equippedItems.lamp).toBe("focus_lamp");
+    expect(equippedSunriseWindow.equippedItems.window).toBe("sunrise_window");
+    expect(getEquippedShopItems(equippedSunriseWindow).map((item) => item.id)).toContain("focus_lamp");
+    expect(getEquippedShopItems(equippedSunriseWindow).map((item) => item.id)).not.toContain("moon_window");
+  });
+
+  test("normalizes old progress records without collection fields", () => {
+    const oldProgress = {
+      ...createInitialProgress("windfire"),
+      ownedItemIds: undefined,
+      equippedItems: undefined,
+    };
+
+    expect(normalizePetProgress(oldProgress).ownedItemIds).toEqual([]);
+    expect(normalizePetProgress(oldProgress).equippedItems).toEqual({});
   });
 });

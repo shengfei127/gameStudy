@@ -53,6 +53,19 @@
         </view>
       </view>
 
+      <view class="panel collection-panel">
+        <view class="panel-head">
+          <text class="panel-title">收藏装备</text>
+          <text class="panel-note">{{ petStore.collectionCount }}/{{ shopItemCount }} 已收集</text>
+        </view>
+        <view class="equip-grid">
+          <view v-for="slot in equipSlots" :key="slot.key" class="equip-item" :class="{ active: Boolean(equippedBySlot[slot.key]) }">
+            <text class="equip-label">{{ slot.label }}</text>
+            <text class="equip-name">{{ getEquippedName(slot.key) }}</text>
+          </view>
+        </view>
+      </view>
+
       <view class="panel">
         <view class="panel-head">
           <text class="panel-title">进化路线</text>
@@ -107,10 +120,13 @@ import { computed } from "vue";
 import PetAvatar from "@/components/PetAvatar.vue";
 import {
   EVOLUTION_STAGES,
+  SHOP_ITEMS,
   getEggOption,
   getPetAssetPath,
   getPetStageAssetPath,
+  getShopItem,
   type EggOption,
+  type ShopItemSlot,
 } from "@/domain/pet";
 import { usePetStore } from "@/stores/pet";
 
@@ -132,9 +148,19 @@ const stats = computed(() => [
   { label: "可用积分", value: progress.value?.points || 0 },
   { label: "成长值", value: progress.value?.growth || 0 },
   { label: "连续天数", value: progress.value?.streak || 0 },
-  { label: "累计小时", value: totalHours.value },
+  { label: "已收集", value: petStore.collectionCount },
 ]);
 const pageStyle = computed(() => (activeEgg.value ? themeStyle(activeEgg.value) : ""));
+const shopItemCount = SHOP_ITEMS.length;
+const equippedBySlot = computed(() => progress.value?.equippedItems || {});
+const equipSlots: Array<{ key: ShopItemSlot; label: string }> = [
+  { key: "head", label: "头饰" },
+  { key: "back", label: "背饰" },
+  { key: "hand", label: "手持" },
+  { key: "aura", label: "光环" },
+  { key: "wall", label: "背景" },
+  { key: "floor", label: "地面" },
+];
 
 function goHome() {
   uni.switchTab({ url: "/pages/home/index" });
@@ -157,6 +183,11 @@ function confirmReset() {
       }
     },
   });
+}
+
+function getEquippedName(slot: ShopItemSlot) {
+  const itemId = equippedBySlot.value[slot];
+  return itemId ? getShopItem(itemId).shortName : "未装";
 }
 
 function themeStyle(egg: EggOption) {
@@ -549,6 +580,48 @@ function hexToRgb(hex: string) {
   color: #7b8797;
   font-size: 20rpx;
   font-weight: 800;
+}
+
+.equip-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10rpx;
+  margin-top: 18rpx;
+}
+
+.equip-item {
+  min-height: 96rpx;
+  padding: 14rpx 8rpx;
+  border: 1rpx solid rgba(var(--accent-rgb, 47, 133, 90), 0.14);
+  border-radius: 16rpx;
+  background: #f8faf9;
+  text-align: center;
+}
+
+.equip-item.active {
+  background: linear-gradient(180deg, #ffffff, var(--shell, #eef7f1));
+  box-shadow: inset 0 0 0 2rpx rgba(var(--accent-rgb, 47, 133, 90), 0.08);
+}
+
+.equip-label,
+.equip-name {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.equip-label {
+  color: #7b8797;
+  font-size: 20rpx;
+  font-weight: 800;
+}
+
+.equip-name {
+  margin-top: 8rpx;
+  color: #203047;
+  font-size: 23rpx;
+  font-weight: 900;
 }
 
 .empty-log {

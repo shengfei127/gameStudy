@@ -3,14 +3,20 @@ import {
   EGG_OPTIONS,
   EVOLUTION_STAGES,
   FEED_ITEMS,
+  SHOP_ITEMS,
   getEggOption,
   getDateKey,
+  getEquippedShopItems,
   getEvolutionProgress,
   getEvolutionStage,
   getNextEvolutionStage,
+  getOwnedShopItems,
+  normalizePetProgress,
   type EggId,
   type FeedItem,
   type PetProgress,
+  type ShopItem,
+  type ShopItemId,
   type StudyInput,
 } from "@/domain/pet";
 import { petApi } from "@/services/pet-api";
@@ -59,6 +65,25 @@ export const usePetStore = defineStore("pet", {
     },
     recentStudyLogs(state) {
       return state.progress ? state.progress.studyLogs.slice(0, 8) : [];
+    },
+    ownedShopItems(state) {
+      return state.progress ? getOwnedShopItems(state.progress) : [];
+    },
+    equippedShopItems(state) {
+      return state.progress ? getEquippedShopItems(state.progress) : [];
+    },
+    collectionCount(state) {
+      return state.progress ? normalizePetProgress(state.progress).ownedItemIds.length : 0;
+    },
+    outfitCollectionCount(state) {
+      return state.progress
+        ? normalizePetProgress(state.progress).ownedItemIds.filter((itemId) => getOwnedCategory(itemId) === "outfit").length
+        : 0;
+    },
+    roomCollectionCount(state) {
+      return state.progress
+        ? normalizePetProgress(state.progress).ownedItemIds.filter((itemId) => getOwnedCategory(itemId) === "room").length
+        : 0;
     },
   },
   actions: {
@@ -116,6 +141,36 @@ export const usePetStore = defineStore("pet", {
         this.loading = false;
       }
     },
+    async buyShopItem(itemId: ShopItemId) {
+      if (!this.progress) {
+        throw new Error("请先选择一颗宠物蛋");
+      }
+
+      this.loading = true;
+      try {
+        const result = await petApi.buyShopItem(itemId);
+        this.progress = result.progress;
+        this.lastMessage = `已收集 ${result.item.name}`;
+        return result;
+      } finally {
+        this.loading = false;
+      }
+    },
+    async equipShopItem(itemId: ShopItemId) {
+      if (!this.progress) {
+        throw new Error("请先选择一颗宠物蛋");
+      }
+
+      this.loading = true;
+      try {
+        const result = await petApi.equipShopItem(itemId);
+        this.progress = result.progress;
+        this.lastMessage = `${result.item.name} 已应用`;
+        return result;
+      } finally {
+        this.loading = false;
+      }
+    },
     async resetProgress() {
       this.loading = true;
       try {
@@ -138,4 +193,8 @@ export const usePetStore = defineStore("pet", {
   },
 });
 
-export { EGG_OPTIONS, EVOLUTION_STAGES, FEED_ITEMS };
+function getOwnedCategory(itemId: ShopItemId): ShopItem["category"] | "" {
+  return SHOP_ITEMS.find((item) => item.id === itemId)?.category || "";
+}
+
+export { EGG_OPTIONS, EVOLUTION_STAGES, FEED_ITEMS, SHOP_ITEMS };

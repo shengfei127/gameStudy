@@ -1,12 +1,17 @@
 import {
+  buyShopItem as applyBuyShopItem,
   createInitialProgress,
+  equipShopItem as applyEquipShopItem,
   feedPet as applyFeedPet,
   getEvolutionStage,
+  normalizePetProgress,
   recordStudySession,
   type EggId,
   type EvolutionStage,
   type FeedItem,
   type PetProgress,
+  type ShopItem,
+  type ShopItemId,
   type StudyInput,
 } from "@/domain/pet";
 import { AUTH_SESSION_STORAGE_KEY, type AuthSession } from "./auth-api";
@@ -28,11 +33,18 @@ export interface FeedResult {
   stage: EvolutionStage;
 }
 
+export interface ShopItemResult {
+  item: ShopItem;
+  progress: PetProgress;
+}
+
 export interface PetApi {
   getProgress(): Promise<PetProgress | null>;
   chooseEgg(eggId: EggId): Promise<PetProgress>;
   recordCheckIn(input: StudyInput): Promise<CheckInResult>;
   feed(itemId: FeedItem["id"]): Promise<FeedResult>;
+  buyShopItem(itemId: ShopItemId): Promise<ShopItemResult>;
+  equipShopItem(itemId: ShopItemId): Promise<ShopItemResult>;
   resetProgress(): Promise<PetProgress | null>;
   uploadStudyPhoto(tempFilePath: string): Promise<string>;
 }
@@ -66,7 +78,14 @@ interface CloudRequest {
   payload: Record<string, unknown>;
 }
 
-type CloudAction = "getProgress" | "chooseEgg" | "checkIn" | "feed" | "resetProgress";
+type CloudAction =
+  | "getProgress"
+  | "chooseEgg"
+  | "checkIn"
+  | "feed"
+  | "buyShopItem"
+  | "equipShopItem"
+  | "resetProgress";
 
 type CloudResponse<T> =
   | {
@@ -115,6 +134,20 @@ export function createLocalPetApi(options: LocalPetApiOptions = {}): PetApi {
       };
     },
 
+    async buyShopItem(itemId) {
+      const progress = requireProgress(readProgress(storage));
+      const result = applyBuyShopItem(progress, itemId);
+      writeProgress(storage, result.progress);
+      return result;
+    },
+
+    async equipShopItem(itemId) {
+      const progress = requireProgress(readProgress(storage));
+      const result = applyEquipShopItem(progress, itemId);
+      writeProgress(storage, result.progress);
+      return result;
+    },
+
     async resetProgress() {
       storage.remove(PROGRESS_STORAGE_KEY);
       return null;
@@ -131,19 +164,27 @@ export function createUniCloudPetApi(options: { storage?: StorageAdapter } = {})
 
   return {
     getProgress() {
-      return callCloud<PetProgress | null>(storage, "getProgress", {});
+      return callProgressCloud(storage, "getProgress", {});
     },
 
     chooseEgg(eggId) {
-      return callCloud<PetProgress>(storage, "chooseEgg", { eggId });
+      return callRequiredProgressCloud(storage, "chooseEgg", { eggId });
     },
 
     recordCheckIn(input) {
-      return callCloud<CheckInResult>(storage, "checkIn", { input });
+      return callCheckInCloud(storage, "checkIn", { input });
     },
 
     feed(itemId) {
-      return callCloud<FeedResult>(storage, "feed", { itemId });
+      return callFeedCloud(storage, "feed", { itemId });
+    },
+
+    buyShopItem(itemId) {
+      return callShopCloud(storage, "buyShopItem", { itemId });
+    },
+
+    equipShopItem(itemId) {
+      return callShopCloud(storage, "equipShopItem", { itemId });
     },
 
     resetProgress() {
@@ -177,19 +218,27 @@ export function createLocalProxyPetApi(
 
   return {
     getProgress() {
-      return callLocalProxy<PetProgress | null>(storage, baseUrl, options.fetcher, "getProgress", {});
+      return callProgressLocalProxy(storage, baseUrl, options.fetcher, "getProgress", {});
     },
 
     chooseEgg(eggId) {
-      return callLocalProxy<PetProgress>(storage, baseUrl, options.fetcher, "chooseEgg", { eggId });
+      return callRequiredProgressLocalProxy(storage, baseUrl, options.fetcher, "chooseEgg", { eggId });
     },
 
     recordCheckIn(input) {
-      return callLocalProxy<CheckInResult>(storage, baseUrl, options.fetcher, "checkIn", { input });
+      return callCheckInLocalProxy(storage, baseUrl, options.fetcher, "checkIn", { input });
     },
 
     feed(itemId) {
-      return callLocalProxy<FeedResult>(storage, baseUrl, options.fetcher, "feed", { itemId });
+      return callFeedLocalProxy(storage, baseUrl, options.fetcher, "feed", { itemId });
+    },
+
+    buyShopItem(itemId) {
+      return callShopLocalProxy(storage, baseUrl, options.fetcher, "buyShopItem", { itemId });
+    },
+
+    equipShopItem(itemId) {
+      return callShopLocalProxy(storage, baseUrl, options.fetcher, "equipShopItem", { itemId });
     },
 
     resetProgress() {
@@ -243,6 +292,26 @@ async function callCloud<T>(storage: StorageAdapter, action: CloudAction, payloa
   return body.data;
 }
 
+async function callProgressCloud(storage: StorageAdapter, action: CloudAction, payload: Record<string, unknown>) {
+  return normalizeProgressResult(await callCloud<PetProgress | null>(storage, action, payload));
+}
+
+async function callRequiredProgressCloud(storage: StorageAdapter, action: CloudAction, payload: Record<string, unknown>) {
+  return normalizePetProgress(await callCloud<PetProgress>(storage, action, payload));
+}
+
+async function callCheckInCloud(storage: StorageAdapter, action: CloudAction, payload: Record<string, unknown>) {
+  return normalizeCheckInResult(await callCloud<CheckInResult>(storage, action, payload));
+}
+
+async function callFeedCloud(storage: StorageAdapter, action: CloudAction, payload: Record<string, unknown>) {
+  return normalizeFeedResult(await callCloud<FeedResult>(storage, action, payload));
+}
+
+async function callShopCloud(storage: StorageAdapter, action: CloudAction, payload: Record<string, unknown>) {
+  return normalizeShopResult(await callCloud<ShopItemResult>(storage, action, payload));
+}
+
 async function callLocalProxy<T>(
   storage: StorageAdapter,
   baseUrl: string,
@@ -278,6 +347,81 @@ async function callLocalProxy<T>(
   return body.data;
 }
 
+async function callProgressLocalProxy(
+  storage: StorageAdapter,
+  baseUrl: string,
+  fetcher: typeof fetch | undefined,
+  action: CloudAction,
+  payload: Record<string, unknown>,
+) {
+  return normalizeProgressResult(await callLocalProxy<PetProgress | null>(storage, baseUrl, fetcher, action, payload));
+}
+
+async function callRequiredProgressLocalProxy(
+  storage: StorageAdapter,
+  baseUrl: string,
+  fetcher: typeof fetch | undefined,
+  action: CloudAction,
+  payload: Record<string, unknown>,
+) {
+  return normalizePetProgress(await callLocalProxy<PetProgress>(storage, baseUrl, fetcher, action, payload));
+}
+
+async function callCheckInLocalProxy(
+  storage: StorageAdapter,
+  baseUrl: string,
+  fetcher: typeof fetch | undefined,
+  action: CloudAction,
+  payload: Record<string, unknown>,
+) {
+  return normalizeCheckInResult(await callLocalProxy<CheckInResult>(storage, baseUrl, fetcher, action, payload));
+}
+
+async function callFeedLocalProxy(
+  storage: StorageAdapter,
+  baseUrl: string,
+  fetcher: typeof fetch | undefined,
+  action: CloudAction,
+  payload: Record<string, unknown>,
+) {
+  return normalizeFeedResult(await callLocalProxy<FeedResult>(storage, baseUrl, fetcher, action, payload));
+}
+
+async function callShopLocalProxy(
+  storage: StorageAdapter,
+  baseUrl: string,
+  fetcher: typeof fetch | undefined,
+  action: CloudAction,
+  payload: Record<string, unknown>,
+) {
+  return normalizeShopResult(await callLocalProxy<ShopItemResult>(storage, baseUrl, fetcher, action, payload));
+}
+
+function normalizeProgressResult(progress: PetProgress | null) {
+  return progress ? normalizePetProgress(progress) : null;
+}
+
+function normalizeCheckInResult(result: CheckInResult) {
+  return {
+    ...result,
+    progress: normalizePetProgress(result.progress),
+  };
+}
+
+function normalizeFeedResult(result: FeedResult) {
+  return {
+    ...result,
+    progress: normalizePetProgress(result.progress),
+  };
+}
+
+function normalizeShopResult(result: ShopItemResult) {
+  return {
+    ...result,
+    progress: normalizePetProgress(result.progress),
+  };
+}
+
 function createCloudRequest(storage: StorageAdapter, action: CloudAction, payload: Record<string, unknown>) {
   return {
     action,
@@ -305,7 +449,7 @@ function readProgress(storage: StorageAdapter) {
   const value = storage.get<PetProgress | null | "">(PROGRESS_STORAGE_KEY);
 
   if (value && typeof value === "object") {
-    return value;
+    return normalizePetProgress(value);
   }
 
   return null;

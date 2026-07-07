@@ -158,6 +158,20 @@
         </view>
       </view>
 
+      <view class="section collection-section">
+        <view class="section-heading">
+          <text class="section-title">收藏装备</text>
+          <text class="section-note">{{ petStore.collectionCount }}/{{ shopItemCount }} 已收集</text>
+        </view>
+        <view class="collection-preview">
+          <view v-for="slot in collectionSlots" :key="slot.key" class="collection-chip" :class="{ active: Boolean(equippedBySlot[slot.key]) }">
+            <text class="collection-label">{{ slot.label }}</text>
+            <text class="collection-value">{{ getEquippedName(slot.key) }}</text>
+          </view>
+        </view>
+        <button class="shop-button" @tap="goShop">去商城收集</button>
+      </view>
+
       <button class="primary-button themed-button" @tap="goCheckIn">去学习打卡</button>
     </view>
   </view>
@@ -166,8 +180,8 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import PetAvatar from "@/components/PetAvatar.vue";
-import { EGG_OPTIONS, FEED_ITEMS, getEggOption, getPetAssetPath, getPetEggCutoutPath } from "@/domain/pet";
-import type { EggId, EggOption, FeedItem } from "@/domain/pet";
+import { EGG_OPTIONS, FEED_ITEMS, SHOP_ITEMS, getEggOption, getPetAssetPath, getPetEggCutoutPath, getShopItem } from "@/domain/pet";
+import type { EggId, EggOption, FeedItem, ShopItemSlot } from "@/domain/pet";
 import { usePetStore } from "@/stores/pet";
 
 const petStore = usePetStore();
@@ -205,6 +219,14 @@ const activeStyle = computed(() => (activeEgg.value ? panelStyle(activeEgg.value
 const pageEgg = computed(() => activeEgg.value || selectedEgg.value);
 const pageStyle = computed(() => themeStyle(pageEgg.value));
 const startButtonLabel = computed(() => (petStore.loading ? "正在同步..." : `选择 ${selectedEgg.value.name}，开始孵化`));
+const shopItemCount = SHOP_ITEMS.length;
+const equippedBySlot = computed(() => progress.value?.equippedItems || {});
+const collectionSlots: Array<{ key: ShopItemSlot; label: string }> = [
+  { key: "head", label: "头饰" },
+  { key: "aura", label: "光环" },
+  { key: "wall", label: "房间" },
+  { key: "lamp", label: "台灯" },
+];
 
 function selectEgg(eggId: EggId) {
   selectedEggId.value = eggId;
@@ -237,6 +259,15 @@ async function handleFeed(itemId: FeedItem["id"]) {
 
 function goCheckIn() {
   uni.switchTab({ url: "/pages/tools/index" });
+}
+
+function goShop() {
+  uni.switchTab({ url: "/pages/shop/index" });
+}
+
+function getEquippedName(slot: ShopItemSlot) {
+  const itemId = equippedBySlot.value[slot];
+  return itemId ? getShopItem(itemId).shortName : "未装";
 }
 
 function panelStyle(egg: EggOption) {
@@ -1221,5 +1252,59 @@ function hexToRgb(hex: string) {
   background: rgba(var(--surface-border-rgb), 0.1);
   color: rgba(32, 48, 71, 0.42);
   box-shadow: none;
+}
+
+.collection-preview {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10rpx;
+  margin-top: 18rpx;
+}
+
+.collection-chip {
+  min-height: 94rpx;
+  padding: 14rpx 8rpx;
+  border: 1rpx solid rgba(var(--surface-border-rgb), 0.18);
+  border-radius: 16rpx;
+  background: rgba(255, 255, 255, 0.72);
+  text-align: center;
+}
+
+.collection-chip.active {
+  background: linear-gradient(180deg, #ffffff, rgba(var(--button-glow-rgb), 0.16));
+  box-shadow: inset 0 0 0 2rpx rgba(var(--surface-border-rgb), 0.1);
+}
+
+.collection-label,
+.collection-value {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.collection-label {
+  color: #7a8494;
+  font-size: 19rpx;
+  font-weight: 800;
+}
+
+.collection-value {
+  margin-top: 8rpx;
+  color: #203047;
+  font-size: 23rpx;
+  font-weight: 900;
+}
+
+.shop-button {
+  height: 72rpx;
+  margin-top: 18rpx;
+  border-radius: 16rpx;
+  background: linear-gradient(135deg, var(--button-start, #203047), var(--button-end, #203047));
+  color: #ffffff;
+  font-size: 26rpx;
+  font-weight: 900;
+  line-height: 72rpx;
+  box-shadow: 0 12rpx 28rpx rgba(var(--button-glow-rgb), 0.18);
 }
 </style>

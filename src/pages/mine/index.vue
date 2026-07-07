@@ -28,6 +28,10 @@
         <text class="quick-value">{{ petStore.todayMinutes }}</text>
         <text class="quick-label">今日分钟</text>
       </view>
+      <view class="quick-card">
+        <text class="quick-value">{{ petStore.collectionCount }}</text>
+        <text class="quick-label">收藏</text>
+      </view>
     </view>
 
     <view class="menu-panel">
@@ -44,6 +48,14 @@
         <view class="menu-copy">
           <text class="menu-title">学习打卡</text>
           <text class="menu-desc">语文、数学、英语每日各一次</text>
+        </view>
+        <text class="menu-arrow">›</text>
+      </view>
+      <view class="menu-row" @tap="goShop">
+        <view class="menu-icon shop-icon">藏</view>
+        <view class="menu-copy">
+          <text class="menu-title">伙伴商城</text>
+          <text class="menu-desc">用积分收集装扮和房间装饰</text>
         </view>
         <text class="menu-arrow">›</text>
       </view>
@@ -68,6 +80,10 @@ function goProfile() {
 
 function goCheckIn() {
   uni.switchTab({ url: "/pages/tools/index" });
+}
+
+function goShop() {
+  uni.switchTab({ url: "/pages/shop/index" });
 }
 
 function confirmLogout() {
@@ -187,7 +203,7 @@ function confirmLogout() {
 
 .quick-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 12rpx;
   margin-top: 18rpx;
 }
@@ -213,7 +229,7 @@ function confirmLogout() {
   display: block;
   margin-top: 8rpx;
   color: #687487;
-  font-size: 22rpx;
+  font-size: 20rpx;
   font-weight: 800;
 }
 
@@ -256,6 +272,10 @@ function confirmLogout() {
 
 .check-icon {
   background: linear-gradient(135deg, #1f3149, #2f855a);
+}
+
+.shop-icon {
+  background: linear-gradient(135deg, #7c2d12, #f97316);
 }
 
 .menu-copy {
