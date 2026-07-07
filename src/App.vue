@@ -4,7 +4,7 @@ import { usePetStore } from "@/stores/pet";
 
 onLaunch(() => {
   const petStore = usePetStore();
-  petStore.hydrate();
+  void petStore.hydrate();
 });
 
 onShow(() => {

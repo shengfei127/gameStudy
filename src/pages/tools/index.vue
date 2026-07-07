@@ -93,7 +93,7 @@
         </view>
       </view>
 
-      <button class="primary-button" :class="{ ready: canSubmit }" @tap="submitCheckIn">
+      <button class="primary-button" :class="{ ready: canSubmit }" :disabled="!canSubmit" @tap="submitCheckIn">
         {{ submitLabel }}
       </button>
 
@@ -133,8 +133,12 @@ const recentLogs = computed(() => petStore.recentStudyLogs);
 const checkedSubjectsToday = computed(() => petStore.checkedSubjectsToday);
 const checkedSubjectSet = computed(() => new Set(checkedSubjectsToday.value));
 const selectedSubjectChecked = computed(() => checkedSubjectSet.value.has(subject.value));
-const canSubmit = computed(() => Boolean(photoPath.value) && !selectedSubjectChecked.value);
+const canSubmit = computed(() => Boolean(photoPath.value) && !selectedSubjectChecked.value && !petStore.loading);
 const submitLabel = computed(() => {
+  if (petStore.loading) {
+    return "正在提交...";
+  }
+
   if (selectedSubjectChecked.value) {
     return `今日${subject.value}已完成`;
   }
@@ -203,7 +207,7 @@ function previewPhoto() {
   });
 }
 
-function submitCheckIn() {
+async function submitCheckIn() {
   if (selectedSubjectChecked.value) {
     uni.showToast({ title: `今天${subject.value}已经打卡过了`, icon: "none" });
     return;
@@ -214,21 +218,28 @@ function submitCheckIn() {
     return;
   }
 
+  uni.showLoading({ title: "正在提交", mask: true });
+  let toastTitle = "";
   try {
-    const result = petStore.checkIn({
+    const uploadedPhotoPath = await petStore.uploadStudyPhoto(photoPath.value);
+    const result = await petStore.checkIn({
       subject: subject.value,
       minutes: Number(minutes.value),
       focusLevel: 2,
-      photoPath: photoPath.value,
+      photoPath: uploadedPhotoPath,
       note: note.value,
     });
     note.value = "";
     photoPath.value = "";
     selectFirstAvailableSubject();
-    uni.showToast({ title: `获得 ${result.reward} 积分`, icon: "none" });
+    toastTitle = `获得 ${result.reward} 积分`;
   } catch (error) {
-    uni.showToast({ title: error instanceof Error ? error.message : "打卡失败", icon: "none" });
+    toastTitle = error instanceof Error ? error.message : "打卡失败";
+  } finally {
+    uni.hideLoading();
   }
+
+  uni.showToast({ title: toastTitle, icon: "none" });
 }
 
 function goHome() {

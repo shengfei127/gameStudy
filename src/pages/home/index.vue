@@ -68,7 +68,9 @@
       </scroll-view>
 
       <view class="action-dock">
-        <button class="primary-button themed-button" @tap="startJourney">选择 {{ selectedEgg.name }}，开始孵化</button>
+        <button class="primary-button themed-button" :disabled="petStore.loading" @tap="startJourney">
+          {{ startButtonLabel }}
+        </button>
       </view>
     </view>
 
@@ -149,7 +151,9 @@
               <text class="feed-desc">{{ item.description }}</text>
               <text class="feed-meta">消耗 {{ item.cost }} 积分，成长 +{{ item.growth }}</text>
             </view>
-            <button class="feed-button" :disabled="!canFeed(item.cost)" @tap="handleFeed(item.id)">喂养</button>
+            <button class="feed-button" :disabled="petStore.loading || !canFeed(item.cost)" @tap="handleFeed(item.id)">
+              喂养
+            </button>
           </view>
         </view>
       </view>
@@ -200,23 +204,28 @@ const selectedStyle = computed(() => panelStyle(selectedEgg.value));
 const activeStyle = computed(() => (activeEgg.value ? panelStyle(activeEgg.value) : ""));
 const pageEgg = computed(() => activeEgg.value || selectedEgg.value);
 const pageStyle = computed(() => themeStyle(pageEgg.value));
+const startButtonLabel = computed(() => (petStore.loading ? "正在同步..." : `选择 ${selectedEgg.value.name}，开始孵化`));
 
 function selectEgg(eggId: EggId) {
   selectedEggId.value = eggId;
 }
 
-function startJourney() {
-  petStore.chooseEgg(selectedEggId.value);
-  uni.showToast({ title: "伙伴已孵化", icon: "none" });
+async function startJourney() {
+  try {
+    await petStore.chooseEgg(selectedEggId.value);
+    uni.showToast({ title: "伙伴已孵化", icon: "none" });
+  } catch (error) {
+    uni.showToast({ title: error instanceof Error ? error.message : "孵化失败", icon: "none" });
+  }
 }
 
 function canFeed(cost: number) {
   return Boolean(progress.value && progress.value.points >= cost);
 }
 
-function handleFeed(itemId: FeedItem["id"]) {
+async function handleFeed(itemId: FeedItem["id"]) {
   try {
-    const result = petStore.feed(itemId);
+    const result = await petStore.feed(itemId);
     uni.showToast({
       title: result.evolved ? `进化到${result.stage.name}` : "喂养成功",
       icon: "none",

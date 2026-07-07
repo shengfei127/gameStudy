@@ -1,0 +1,29 @@
+{
+  "bsonType": "object",
+  "required": ["clientId", "progress", "createdAt", "updatedAt"],
+  "permission": {
+    "read": false,
+    "create": false,
+    "update": false,
+    "delete": false
+  },
+  "properties": {
+    "_id": {
+      "description": "uniCloud 自动生成的记录 ID"
+    },
+    "clientId": {
+      "bsonType": "string",
+      "description": "前端匿名客户端 ID，用于 MVP 阶段关联学习档案"
+    },
+    "progress": {
+      "bsonType": "object",
+      "description": "宠物、积分、成长值、学习记录和喂养记录快照"
+    },
+    "createdAt": {
+      "bsonType": "string"
+    },
+    "updatedAt": {
+      "bsonType": "string"
+    }
+  }
+}

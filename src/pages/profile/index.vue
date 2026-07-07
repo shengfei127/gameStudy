@@ -96,10 +96,14 @@ function confirmReset() {
     content: "当前宠物、积分和学习记录都会清空。",
     confirmText: "清空",
     confirmColor: "#c2410c",
-    success(result) {
+    async success(result) {
       if (result.confirm) {
-        petStore.resetProgress();
-        uni.showToast({ title: "已重置", icon: "none" });
+        try {
+          await petStore.resetProgress();
+          uni.showToast({ title: "已重置", icon: "none" });
+        } catch (error) {
+          uni.showToast({ title: error instanceof Error ? error.message : "重置失败", icon: "none" });
+        }
       }
     },
   });
