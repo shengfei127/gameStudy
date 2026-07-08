@@ -1,0 +1,18 @@
+Use case: stylized-concept
+Asset type: reusable in-app stage background image for a mobile pet collection shop
+Primary request: Generate only the empty stage background for a cozy collection-room showcase. This image will be used behind separately layered pet, outfit, and decoration PNG/WebP assets.
+Scene/backdrop: A refined miniature study-room display stage inside a softly rounded rectangular panel. The room has sage green plaster walls, warm walnut floor, a subtle arched back wall, and a museum spotlight from the top center. It should feel like a premium pet collection display cabinet.
+Subject: Empty background only. No pet, no character, no specific furniture item, no clock, no window picture, no books, no desk, no lamp, no rug pattern icon. Instead, include clean empty placement zones:
+- center: a soft circular spotlight pedestal and subtle empty glass display area where the pet portrait will be placed later;
+- left wall: one empty softly lit alcove/plaque for a window decoration;
+- right wall: one empty softly lit alcove/plaque for a shelf or wall decor;
+- lower right floor: one empty low plinth/outline zone for desk and lamp assets;
+- lower center floor: a simple empty oval rug/pedestal zone for floor decoration assets;
+- far left and far right edges: very subtle vertical rails/pads where outfit slot orbs can sit without fighting the room.
+Style/medium: high-quality 3D game UI background, cozy collection game, soft painted realism, premium but friendly.
+Composition/framing: Landscape stage background, no outer phone chrome, no header, no buttons, no tabs, no text. Aspect ratio about 1.15:1. Leave the center clear for a rectangular pet portrait overlay. Make all empty zones aligned and calm, not busy.
+Lighting/mood: warm top spotlight, gentle ambient shadows, soft glassy highlights, quiet display-room atmosphere.
+Color palette: sage green, warm walnut brown, muted cream, soft brass accents, charcoal edge vignette.
+Materials/textures: frosted glass panels, matte plaster wall, polished wood floor, subtle brass trim, soft shadowed alcoves.
+Constraints: no readable text, no logos, no watermark, no characters, no animals, no actual decoration objects, no red boxes, no UI labels. The empty slots must be visible but understated so separately overlaid assets look intentional.
+Avoid: clutter, floating objects, random icons, strong gradients, purple/blue neon, over-detailed background, central busy art, high contrast behind the pet.

@@ -1,0 +1,10 @@
+Use case: stylized-concept
+Asset type: mobile game pet outfit display stage background, used behind transparent outfit item PNG/WebP overlays
+Primary request: Create a polished empty outfit-collection stage background with clear empty positions for pet dress-up items.
+Scene/backdrop: A premium cozy collector display room that matches a warm olive-green and walnut-wood study-pet shop aesthetic. Front-facing, slightly dimensional 3D render, clean and orderly.
+Composition/framing: Canvas is near-square vertical mobile stage artwork, 1056x1008. Leave the center open for a pet portrait on a raised lit pedestal. Add a soft circular halo plate behind the center pet area, but keep it empty. Add a top-center small empty crown/head accessory niche. Add a left-side vertical display rail with two empty glowing round/oval sockets for back accessory and aura. Add a right-side vertical display rail with two empty sockets for hand item and special effect. Use symmetrical spacing, generous negative space, and visible empty slots.
+Lighting/mood: Warm museum spotlighting, refined, calm, collectible, not busy. Subtle gold trim and soft shadows.
+Color palette: Olive green wall, walnut wood floor, antique brass/gold trim, warm cream highlights. Avoid purple/blue gradient dominance.
+Materials/textures: Brushed brass, polished wood, matte plaster wall, clear glass hints, soft velvet-like display pads.
+Constraints: Background only. No pet, no character, no actual clothing, no crown, no headband, no cape, no backpack, no brush, no staff, no rings, no particles, no item icons, no labels. No text, no logo, no watermark, no UI cards. Empty display slots must be obvious and clean so transparent app assets can be placed on top later.
+Avoid: clutter, random decorations, busy shelves, decorative blobs, dark unreadable corners, flat poster style, UI mockup controls, text.

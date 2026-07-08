@@ -1,0 +1,13 @@
+Use case: ui-mockup
+Asset type: vertical mobile game UI concept reference for a pet collection shop stage
+Primary request: Create a polished mobile app screen concept for a cozy pet collection room showcase. The design should solve visual clutter by using a clean room display composition.
+Scene/backdrop: A warm study-room showcase inside a rounded dark shop card. The stage area has a single large arched room backdrop at the back, soft sage glass walls, a quiet wood floor, and a centered rug. Room decorations are organized into fixed display zones: one wall backdrop centered behind the pet, one small window on the left wall, one small clock or shelf on the right wall, and a small desk/lamp grouped at the lower right edge. No floating random objects.
+Subject: A central pet portrait placeholder inside a refined glass display frame, treated as the hero. Leave generous clear space around the hero portrait.
+Style/medium: high-fidelity mobile game UI mockup, cozy collection game, soft 3D illustration feel, refined and tidy, premium but playful.
+Composition/framing: 9:16 phone screenshot. Top shop header with points card, then a large stage panel occupying the upper half. Stage panel is orderly: background room art is subtle, pet frame is centered, room items are peripheral and aligned. Below the stage, use five small rounded equipment chips in one row, then stat cards and tab buttons.
+Lighting/mood: warm museum display lighting, soft spotlight on the pet frame, gentle ambient shadows, calm and collectible.
+Color palette: charcoal shop shell, warm amber accents, sage green glass, walnut brown floor, cream cards.
+Materials/textures: frosted glass, soft shadows, matte wood, subtle paper-like card surface.
+Text: avoid readable text; use abstract label blocks or blurred placeholder glyphs only.
+Constraints: the stage must look elegant, tidy, and less cluttered than the reference screenshot. Do not place objects over the pet portrait. Do not use red annotation boxes. Do not use watermarks. No brand logos.
+Avoid: messy overlapping decorations, many floating icons, saturated neon colors, generic purple gradients, dense text, marketing hero layout.

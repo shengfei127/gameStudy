@@ -26,7 +26,8 @@
           </view>
         </view>
 
-        <view class="preview-stage" :style="previewStyle">
+        <view class="preview-stage" :class="stageModeClass" :style="previewStyle">
+          <image class="stage-bg-image" :src="stageBackgroundSrc" mode="scaleToFill" />
           <view class="stage-arch" />
           <view class="room-wall">
             <image
@@ -132,7 +133,7 @@
               v-for="slot in column.slots"
               :key="slot.key"
               class="stage-slot"
-              :class="{ active: Boolean(equippedBySlot[slot.key]) }"
+              :class="[{ active: Boolean(equippedBySlot[slot.key]) }, `stage-slot-${slot.key}`]"
             >
               <view class="stage-slot-orb">
                 <image
@@ -148,7 +149,7 @@
           </view>
         </view>
 
-        <view class="equipped-strip">
+        <view class="equipped-strip" :class="stageModeClass">
           <view v-for="slot in visibleSlots" :key="slot.key" class="equip-chip" :class="{ active: Boolean(equippedBySlot[slot.key]) }">
             <text class="equip-chip-label">{{ slot.label }}</text>
             <text class="equip-chip-value">{{ getEquippedName(slot.key) }}</text>
@@ -243,6 +244,12 @@ const isEggStage = computed(() => petStore.stage.id === "egg");
 const petPortraitSrc = computed(() =>
   progress.value ? getPetStageAssetPath(progress.value.eggId, petStore.stage.id) : "/static/pets/windfire-egg-cutout.webp",
 );
+const stageModeClass = computed(() => (activeCategory.value === "room" ? "room-mode" : "outfit-mode"));
+const stageBackgroundSrc = computed(() =>
+  activeCategory.value === "room"
+    ? "/static/shop-stage/collection-room-empty-slots.webp"
+    : "/static/shop-stage/outfit-stage-empty-slots.webp",
+);
 const tabs = computed(() => [
   {
     key: "outfit" as const,
@@ -274,7 +281,6 @@ const stageOutfitColumns: Array<{
   {
     side: "left",
     slots: [
-      { key: "head", label: "头饰" },
       { key: "back", label: "背饰" },
       { key: "aura", label: "光环" },
     ],
@@ -1119,57 +1125,41 @@ function hexToRgb(hex: string) {
 
 .preview-stage {
   height: 612rpx;
-  border-color: rgba(255, 255, 255, 0.42);
-  border-radius: 32rpx;
-  background:
-    radial-gradient(circle at 50% 10%, rgba(255, 255, 255, 0.3), transparent 24%),
-    linear-gradient(180deg, rgba(226, 242, 235, 0.88) 0%, rgba(137, 173, 165, 0.78) 42%, rgba(70, 52, 43, 0.94) 100%),
-    linear-gradient(135deg, var(--room-wall), #182028 78%);
+  border: 1rpx solid rgba(236, 221, 188, 0.48);
+  border-radius: 34rpx;
+  background: #152019;
   box-shadow:
-    inset 0 1rpx 0 rgba(255, 255, 255, 0.72),
-    inset 0 -86rpx 92rpx rgba(42, 25, 18, 0.34),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.7),
+    inset 0 -92rpx 104rpx rgba(45, 29, 22, 0.42),
     0 22rpx 42rpx rgba(15, 23, 42, 0.18);
 }
 
+.stage-bg-image {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  opacity: 1;
+  pointer-events: none;
+}
+
 .preview-stage::before {
-  right: -34rpx;
-  bottom: -54rpx;
-  left: -34rpx;
-  z-index: 3;
-  height: 210rpx;
-  border-radius: 48% 52% 0 0 / 54% 54% 0 0;
-  background:
-    radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.34), transparent 46%),
-    linear-gradient(135deg, rgba(87, 71, 61, 0.92), rgba(111, 92, 72, 0.9) 42%, rgba(58, 43, 38, 0.98));
+  display: none;
 }
 
 .preview-stage::after {
-  right: auto;
-  bottom: 68rpx;
-  left: 50%;
-  z-index: 8;
-  width: 306rpx;
-  height: 70rpx;
-  border: 1rpx solid rgba(255, 255, 255, 0.2);
-  background:
-    radial-gradient(ellipse at 50% 40%, rgba(255, 255, 255, 0.32), rgba(var(--egg-accent-rgb, 47, 133, 90), 0.2) 46%, rgba(23, 18, 16, 0.26) 100%);
-  box-shadow: 0 20rpx 34rpx rgba(15, 23, 42, 0.2);
-  transform: translateX(-50%);
+  display: none;
 }
 
 .stage-arch {
-  position: absolute;
-  top: 26rpx;
-  right: 118rpx;
-  left: 118rpx;
-  z-index: 1;
-  display: block;
-  height: 118rpx;
-  border: 2rpx solid rgba(255, 255, 255, 0.2);
-  border-bottom: 0;
-  border-radius: 140rpx 140rpx 0 0;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.14), transparent);
-  opacity: 0.56;
+  display: none;
+}
+
+.stage-arch::before {
+  display: none;
 }
 
 .gallery-rim {
@@ -1186,97 +1176,140 @@ function hexToRgb(hex: string) {
 }
 
 .stage-crest {
-  position: absolute;
-  top: 56rpx;
-  left: 50%;
-  z-index: 3;
-  width: 78rpx;
-  height: 28rpx;
-  border: 1rpx solid rgba(255, 255, 255, 0.28);
-  border-radius: 999rpx;
-  background:
-    radial-gradient(circle at 50% 46%, rgba(255, 255, 255, 0.72), transparent 34%),
-    rgba(var(--egg-accent-rgb, 47, 133, 90), 0.22);
-  opacity: 0.42;
-  box-shadow: 0 10rpx 22rpx rgba(15, 23, 42, 0.12);
-  transform: translateX(-50%);
-}
-
-.room-wall {
-  background:
-    radial-gradient(circle at 24% 16%, rgba(255, 255, 255, 0.22), transparent 24%),
-    radial-gradient(circle at 76% 12%, rgba(255, 255, 255, 0.16), transparent 22%),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1rpx, transparent 1rpx),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.12), transparent 56%);
-  background-size: auto, auto, 128rpx 100%, auto;
-  opacity: 0.82;
-}
-
-.wall-art {
   display: none;
 }
 
+.room-wall {
+  z-index: 1;
+  background: none;
+  opacity: 1;
+  pointer-events: none;
+}
+
+.room-wall::before {
+  display: none;
+}
+
+.wall-art {
+  top: 78rpx;
+  left: 50%;
+  z-index: 2;
+  display: block;
+  width: 230rpx;
+  height: 268rpx;
+  border-radius: 116rpx 116rpx 32rpx 32rpx / 84rpx 84rpx 30rpx 30rpx;
+  opacity: 0.38;
+  filter: saturate(0.96) contrast(1.02) brightness(1.1);
+  transform: translateX(-50%);
+}
+
 .stage-haze {
-  z-index: 4;
+  z-index: 3;
   background:
-    radial-gradient(ellipse at 50% 44%, rgba(255, 255, 255, 0.24), transparent 34%),
-    linear-gradient(180deg, transparent 36%, rgba(13, 18, 24, 0.08) 68%, rgba(13, 18, 24, 0.22) 100%);
+    radial-gradient(ellipse at 50% 38%, rgba(255, 244, 202, 0.1), transparent 30%),
+    linear-gradient(180deg, transparent 58%, rgba(13, 18, 24, 0.08) 100%);
 }
 
 .stage-prop {
-  z-index: 5;
-  opacity: 0.62;
+  z-index: 6;
+  opacity: 1;
 }
 
-.stage-prop::before,
 .prop-empty {
   display: none;
 }
 
+.stage-prop::before {
+  display: none;
+}
+
 .prop-image {
-  filter: drop-shadow(0 10rpx 14rpx rgba(0, 0, 0, 0.22));
+  filter: drop-shadow(0 12rpx 14rpx rgba(0, 0, 0, 0.3));
 }
 
 .window-piece {
-  display: none;
+  top: 162rpx;
+  right: auto;
+  left: 58rpx;
+  display: flex;
+  width: 124rpx;
+  height: 146rpx;
+  opacity: 0.96;
+  transform: none;
 }
 
 .window-image {
-  width: 64rpx;
-  height: 76rpx;
-  opacity: 0.72;
+  width: 112rpx;
+  height: 132rpx;
+  opacity: 0.96;
 }
 
 .room-shelf {
-  display: none;
+  top: 162rpx;
+  right: 58rpx;
+  left: auto;
+  display: flex;
+  width: 128rpx;
+  height: 120rpx;
+  opacity: 0.96;
+  transform: none;
 }
 
 .shelf-image {
-  width: 126rpx;
-  height: 70rpx;
-  opacity: 0.52;
+  width: 118rpx;
+  height: 102rpx;
+  opacity: 0.96;
 }
 
 .room-desk {
-  display: none;
+  right: 30rpx;
+  bottom: 80rpx;
+  z-index: 7;
+  display: flex;
+  width: 158rpx;
+  height: 104rpx;
+  opacity: 0.96;
+  transform: none;
 }
 
 .desk-image {
-  width: 72rpx;
-  height: 54rpx;
+  width: 148rpx;
+  height: 94rpx;
 }
 
 .room-lamp {
-  display: none;
+  right: 136rpx;
+  bottom: 134rpx;
+  z-index: 8;
+  display: flex;
+  width: 72rpx;
+  height: 106rpx;
+  opacity: 0.96;
+  transform: none;
 }
 
 .lamp-image {
-  width: 44rpx;
-  height: 68rpx;
+  width: 66rpx;
+  height: 100rpx;
+}
+
+.room-lamp::after {
+  position: absolute;
+  top: 18rpx;
+  left: -18rpx;
+  z-index: 1;
+  width: 112rpx;
+  height: 88rpx;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 52% 48%, rgba(254, 240, 138, 0.5), rgba(254, 240, 138, 0.18) 46%, transparent 72%);
+  filter: blur(8rpx);
+  content: "";
+  opacity: 0.72;
+  pointer-events: none;
 }
 
 .room-lamp.active {
-  filter: drop-shadow(0 0 18rpx rgba(254, 243, 199, 0.72));
+  filter: drop-shadow(0 0 20rpx rgba(254, 243, 199, 0.82));
 }
 
 .floor-piece {
@@ -1286,54 +1319,143 @@ function hexToRgb(hex: string) {
   z-index: 4;
   height: 190rpx;
   border-radius: 0;
-  background:
-    radial-gradient(ellipse at 50% 18%, rgba(255, 255, 255, 0.24), transparent 50%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 24%),
-    linear-gradient(135deg, rgba(75, 57, 48, 0.8), rgba(46, 34, 32, 0.96));
-  opacity: 0.92;
+  background: none;
+  opacity: 1;
 }
 
 .floor-image {
-  bottom: 18rpx;
-  z-index: 5;
-  width: 360rpx;
+  bottom: 34rpx;
+  z-index: 7;
+  width: 470rpx;
+  height: 150rpx;
+  opacity: 0.88;
+  filter: saturate(1.08) contrast(1.04) drop-shadow(0 12rpx 16rpx rgba(0, 0, 0, 0.18));
+  transform: translateX(-50%);
+}
+
+.preview-stage.outfit-mode .wall-art {
+  display: none;
+}
+
+.preview-stage.outfit-mode .room-wall,
+.preview-stage.outfit-mode .floor-piece {
+  display: none;
+}
+
+.preview-stage.outfit-mode .window-piece,
+.preview-stage.outfit-mode .room-shelf,
+.preview-stage.outfit-mode .room-desk,
+.preview-stage.outfit-mode .room-lamp {
+  display: none;
+}
+
+.preview-stage.outfit-mode .floor-image {
+  display: none;
+}
+
+.preview-stage.room-mode .equip-rail {
+  display: none;
+}
+
+.preview-stage.room-mode .wall-art {
+  opacity: 0.42;
+}
+
+.preview-stage.room-mode .window-piece {
+  top: 162rpx;
+  left: 58rpx;
+  width: 124rpx;
+  height: 146rpx;
+}
+
+.preview-stage.room-mode .window-image {
+  width: 112rpx;
   height: 132rpx;
-  opacity: 0.24;
-  transform: translateX(-50%) perspective(330rpx) rotateX(60deg);
+}
+
+.preview-stage.room-mode .room-shelf {
+  top: 162rpx;
+  right: 58rpx;
+  width: 128rpx;
+  height: 120rpx;
+}
+
+.preview-stage.room-mode .shelf-image {
+  width: 118rpx;
+  height: 102rpx;
+}
+
+.preview-stage.room-mode .room-desk {
+  right: 30rpx;
+  bottom: 80rpx;
+  width: 158rpx;
+  height: 104rpx;
+}
+
+.preview-stage.room-mode .desk-image {
+  width: 148rpx;
+  height: 94rpx;
+}
+
+.preview-stage.room-mode .room-lamp {
+  right: 136rpx;
+  bottom: 134rpx;
+  width: 72rpx;
+  height: 106rpx;
+}
+
+.preview-stage.room-mode .lamp-image {
+  width: 66rpx;
+  height: 100rpx;
+}
+
+.preview-stage.room-mode .floor-image {
+  opacity: 0.88;
+}
+
+.preview-stage.room-mode .floor-piece {
+  top: 0;
+  height: auto;
+}
+
+.preview-stage.room-mode .outfit-anchor,
+.preview-stage.room-mode .equip-aura,
+.preview-stage.room-mode .effect-orbit {
+  display: none;
 }
 
 .pet-light {
-  bottom: 104rpx;
+  bottom: 116rpx;
   z-index: 6;
-  width: 340rpx;
-  height: 184rpx;
-  opacity: 0.78;
+  width: 300rpx;
+  height: 172rpx;
+  opacity: 0.84;
   background:
-    radial-gradient(ellipse at center, rgba(255, 255, 255, 0.38), rgba(var(--egg-accent-rgb, 47, 133, 90), 0.2) 45%, transparent 72%);
+    radial-gradient(ellipse at center, rgba(255, 246, 216, 0.42), rgba(var(--egg-accent-rgb, 47, 133, 90), 0.16) 46%, transparent 72%);
 }
 
 .pet-showcase {
   z-index: 9;
-  bottom: 124rpx;
-  width: 318rpx;
-  height: 300rpx;
-  border-color: rgba(255, 255, 255, 0.56);
-  border-radius: 28rpx;
+  bottom: 126rpx;
+  width: 286rpx;
+  height: 288rpx;
+  border: 2rpx solid rgba(237, 219, 183, 0.64);
+  border-radius: 34rpx 34rpx 28rpx 28rpx;
   background:
-    radial-gradient(circle at 74% 12%, rgba(255, 255, 255, 0.7), transparent 26%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.12)),
-    rgba(255, 255, 255, 0.22);
+    radial-gradient(circle at 74% 12%, rgba(255, 249, 224, 0.74), transparent 26%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.48), rgba(255, 255, 255, 0.16)),
+    rgba(255, 255, 255, 0.2);
   box-shadow:
-    inset 0 1rpx 0 rgba(255, 255, 255, 0.66),
-    inset 0 -22rpx 36rpx rgba(15, 23, 42, 0.12),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.72),
+    inset 0 -22rpx 36rpx rgba(55, 36, 24, 0.14),
     0 22rpx 36rpx rgba(15, 23, 42, 0.24);
 }
 
 .pet-showcase-halo {
-  top: 32rpx;
-  width: 280rpx;
+  top: 20rpx;
+  width: 238rpx;
   height: 210rpx;
-  opacity: 0.76;
+  opacity: 0.68;
 }
 
 .pet-showcase-glow {
@@ -1345,16 +1467,16 @@ function hexToRgb(hex: string) {
 }
 
 .pet-showcase-cutout {
-  inset: 12rpx;
-  border-radius: 22rpx;
+  inset: 14rpx;
+  border-radius: 26rpx 26rpx 22rpx 22rpx;
 }
 
 .pet-showcase-cutout::after {
-  border-radius: 24rpx;
+  border-radius: 26rpx;
 }
 
 .pet-portrait-image {
-  border-radius: 20rpx;
+  border-radius: 22rpx;
 }
 
 .pet-showcase-shadow {
@@ -1366,9 +1488,9 @@ function hexToRgb(hex: string) {
 }
 
 .pet-showcase.egg {
-  bottom: 124rpx;
-  width: 260rpx;
-  height: 310rpx;
+  bottom: 126rpx;
+  width: 248rpx;
+  height: 306rpx;
   border-radius: 34rpx;
 }
 
@@ -1505,6 +1627,380 @@ function hexToRgb(hex: string) {
   white-space: nowrap;
 }
 
+.preview-stage.outfit-mode .outfit-head {
+  top: 72rpx;
+  left: 50%;
+  z-index: 15;
+  display: flex;
+  width: 118rpx;
+  height: 88rpx;
+  transform: translateX(-50%);
+}
+
+.preview-stage.outfit-mode .outfit-back,
+.preview-stage.outfit-mode .outfit-hand {
+  display: none;
+}
+
+.preview-stage.outfit-mode .outfit-head::after,
+.preview-stage.outfit-mode .anchor-label {
+  display: none;
+}
+
+.preview-stage.outfit-mode .outfit-head .anchor-glass {
+  inset: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.preview-stage.outfit-mode .outfit-head .outfit-image {
+  width: 112%;
+  height: 112%;
+  border-radius: 0;
+  filter: drop-shadow(0 10rpx 10rpx rgba(0, 0, 0, 0.34));
+}
+
+.preview-stage.outfit-mode .equip-rail {
+  top: 184rpx;
+  bottom: 116rpx;
+  z-index: 14;
+  width: 112rpx;
+  justify-content: space-between;
+  gap: 0;
+  opacity: 1;
+}
+
+.preview-stage.outfit-mode .equip-rail-left {
+  left: 32rpx;
+}
+
+.preview-stage.outfit-mode .equip-rail-right {
+  right: 32rpx;
+}
+
+.preview-stage.outfit-mode .stage-slot {
+  min-height: 118rpx;
+  justify-content: center;
+  gap: 0;
+}
+
+.preview-stage.outfit-mode .stage-slot-orb {
+  position: relative;
+  width: 104rpx;
+  height: 104rpx;
+  overflow: visible;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.preview-stage.outfit-mode .stage-slot-image {
+  width: 110rpx;
+  height: 110rpx;
+  border-radius: 0;
+  filter: drop-shadow(0 12rpx 12rpx rgba(0, 0, 0, 0.34));
+}
+
+.preview-stage.outfit-mode .stage-slot-back .stage-slot-image {
+  width: 124rpx;
+  height: 124rpx;
+}
+
+.preview-stage.outfit-mode .stage-slot-hand .stage-slot-image {
+  width: 178rpx;
+  height: 178rpx;
+  filter:
+    drop-shadow(0 0 5rpx rgba(255, 246, 216, 0.72))
+    drop-shadow(0 13rpx 13rpx rgba(0, 0, 0, 0.34))
+    brightness(1.16)
+    contrast(1.06);
+  transform: rotate(-24deg);
+}
+
+.preview-stage.outfit-mode .stage-slot-hand .stage-slot-orb::before {
+  position: absolute;
+  inset: 22rpx;
+  border-radius: 50%;
+  background: rgba(255, 246, 216, 0.2);
+  content: "";
+  filter: blur(5rpx);
+}
+
+.preview-stage.outfit-mode .stage-slot-aura .stage-slot-image {
+  width: 112rpx;
+  height: 112rpx;
+}
+
+.preview-stage.outfit-mode .stage-slot-effect .stage-slot-image {
+  width: 118rpx;
+  height: 118rpx;
+}
+
+.preview-stage.outfit-mode .stage-slot-label,
+.preview-stage.outfit-mode .stage-slot-empty {
+  display: none;
+}
+
+.preview-stage.outfit-mode .equip-aura,
+.preview-stage.outfit-mode .effect-orbit {
+  display: none;
+}
+
+.preview-stage.outfit-mode .pet-light {
+  bottom: 104rpx;
+  width: 318rpx;
+  height: 214rpx;
+  opacity: 0.42;
+  background: radial-gradient(ellipse at center, rgba(255, 246, 216, 0.36), rgba(var(--egg-accent-rgb, 47, 133, 90), 0.12) 46%, transparent 72%);
+}
+
+.preview-stage.outfit-mode .pet-showcase {
+  bottom: 106rpx;
+  width: 254rpx;
+  height: 274rpx;
+  border-color: rgba(247, 224, 176, 0.72);
+  background:
+    radial-gradient(circle at 74% 12%, rgba(255, 249, 224, 0.56), transparent 26%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.38), rgba(255, 255, 255, 0.14)),
+    rgba(255, 255, 255, 0.16);
+}
+
+.preview-stage.room-mode .pet-light {
+  bottom: 120rpx;
+  width: 240rpx;
+  height: 154rpx;
+  opacity: 0.48;
+}
+
+.preview-stage.room-mode .pet-showcase {
+  bottom: 128rpx;
+  width: 208rpx;
+  height: 226rpx;
+  border-color: rgba(237, 219, 183, 0.54);
+  background:
+    radial-gradient(circle at 74% 12%, rgba(255, 249, 224, 0.5), transparent 26%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.12)),
+    rgba(255, 255, 255, 0.14);
+  box-shadow:
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.62),
+    inset 0 -18rpx 30rpx rgba(55, 36, 24, 0.12),
+    0 16rpx 26rpx rgba(15, 23, 42, 0.2);
+}
+
+.preview-stage.room-mode .pet-showcase-halo {
+  width: 182rpx;
+  height: 164rpx;
+  opacity: 0.48;
+}
+
+.preview-stage.room-mode .pet-showcase-glow {
+  right: 26rpx;
+  left: 26rpx;
+  height: 54rpx;
+  opacity: 0.5;
+}
+
+.preview-stage.room-mode .pet-showcase-cutout {
+  inset: 12rpx;
+  border-radius: 24rpx;
+}
+
+.preview-stage.room-mode .pet-showcase-shadow {
+  right: 42rpx;
+  left: 42rpx;
+}
+
+/* Stage overlay coordinates are percentages of the generated 1056x1008 background. */
+.preview-stage {
+  height: 0;
+  padding-top: 95.4545%;
+}
+
+.stage-bg-image {
+  object-fit: fill;
+}
+
+.preview-stage.room-mode .wall-art {
+  top: 21.5%;
+  left: 50%;
+  width: 23%;
+  height: 31%;
+  opacity: 0.4;
+}
+
+.preview-stage.room-mode .window-piece {
+  top: 30.5%;
+  left: 7.2%;
+  width: 19%;
+  height: 28%;
+}
+
+.preview-stage.room-mode .window-image {
+  width: 100%;
+  height: 100%;
+}
+
+.preview-stage.room-mode .room-shelf {
+  top: 31%;
+  right: 6.5%;
+  width: 19%;
+  height: 24%;
+}
+
+.preview-stage.room-mode .shelf-image {
+  width: 100%;
+  height: 100%;
+}
+
+.preview-stage.room-mode .room-desk {
+  right: 4.4%;
+  bottom: 15.4%;
+  width: 23%;
+  height: 16.5%;
+}
+
+.preview-stage.room-mode .desk-image {
+  width: 100%;
+  height: 100%;
+}
+
+.preview-stage.room-mode .room-lamp {
+  right: 10.8%;
+  bottom: 21.8%;
+  width: 8.8%;
+  height: 16%;
+}
+
+.preview-stage.room-mode .lamp-image {
+  width: 100%;
+  height: 100%;
+}
+
+.preview-stage.room-mode .room-lamp::after {
+  inset: 18% -34% auto -34%;
+  width: auto;
+  height: 72%;
+}
+
+.preview-stage.room-mode .floor-image {
+  bottom: 6.8%;
+  width: 50%;
+  height: 17%;
+}
+
+.preview-stage.room-mode .pet-light {
+  bottom: 29%;
+  width: 36%;
+  height: 26%;
+}
+
+.preview-stage.room-mode .pet-showcase {
+  bottom: 30%;
+  width: 32%;
+  height: 37%;
+}
+
+.preview-stage.room-mode .pet-showcase-halo {
+  width: 88%;
+  height: 72%;
+}
+
+.preview-stage.outfit-mode .outfit-head {
+  top: 6.6%;
+  left: 48.8%;
+  width: 18%;
+  height: 12%;
+}
+
+.preview-stage.outfit-mode .equip-rail {
+  top: 0;
+  bottom: 0;
+  width: 22%;
+}
+
+.preview-stage.outfit-mode .equip-rail-left {
+  left: 5.5%;
+}
+
+.preview-stage.outfit-mode .equip-rail-right {
+  right: 5.5%;
+}
+
+.preview-stage.outfit-mode .stage-slot {
+  position: absolute;
+  left: 50%;
+  min-height: 0;
+  width: 78%;
+  height: 22%;
+  transform: translateX(-50%);
+}
+
+.preview-stage.outfit-mode .stage-slot-back {
+  top: 27.6%;
+}
+
+.preview-stage.outfit-mode .stage-slot-hand {
+  top: 27.2%;
+}
+
+.preview-stage.outfit-mode .stage-slot-aura {
+  left: 46.5%;
+  top: 49.2%;
+}
+
+.preview-stage.outfit-mode .stage-slot-effect {
+  top: 50.2%;
+}
+
+.preview-stage.outfit-mode .stage-slot-orb {
+  width: 100%;
+  height: 100%;
+}
+
+.preview-stage.outfit-mode .stage-slot-image {
+  width: 108%;
+  height: 108%;
+}
+
+.preview-stage.outfit-mode .stage-slot-back .stage-slot-image {
+  width: 104%;
+  height: 104%;
+}
+
+.preview-stage.outfit-mode .stage-slot-hand .stage-slot-image {
+  width: 148%;
+  height: 148%;
+}
+
+.preview-stage.outfit-mode .stage-slot-aura .stage-slot-image {
+  width: 106%;
+  height: 106%;
+}
+
+.preview-stage.outfit-mode .stage-slot-effect .stage-slot-image {
+  width: 110%;
+  height: 110%;
+}
+
+.preview-stage.outfit-mode .stage-slot-hand .stage-slot-orb::before {
+  inset: 22%;
+}
+
+.preview-stage.outfit-mode .pet-light {
+  bottom: 26%;
+  width: 42%;
+  height: 32%;
+}
+
+.preview-stage.outfit-mode .pet-showcase {
+  bottom: 26%;
+  width: 38%;
+  height: 42%;
+}
+
 .equipped-strip {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -1518,6 +2014,11 @@ function hexToRgb(hex: string) {
   border: 1rpx solid rgba(255, 255, 255, 0.18);
   border-radius: 14rpx;
   background: rgba(255, 255, 255, 0.09);
+}
+
+.equipped-strip.outfit-mode .equip-chip:nth-child(n + 6),
+.equipped-strip.room-mode .equip-chip:nth-child(-n + 5) {
+  display: none;
 }
 
 .equip-chip.active {
