@@ -1,0 +1,13 @@
+{
+  "versionName": "0.1.0",
+  "versionCode": 10,
+  "platforms": [
+    "android",
+    "app-plus"
+  ],
+  "downloadUrl": "",
+  "changelog": [
+    "Initialize in-app update manifest"
+  ],
+  "force": false
+}
