@@ -59,6 +59,14 @@
         </view>
         <text class="menu-arrow">›</text>
       </view>
+      <view class="menu-row" :class="{ disabled: checkingUpdate }" @tap="handleCheckUpdate">
+        <view class="menu-icon update-icon">版</view>
+        <view class="menu-copy">
+          <text class="menu-title">检查更新</text>
+          <text class="menu-desc">{{ updateDescription }}</text>
+        </view>
+        <text class="menu-arrow">›</text>
+      </view>
     </view>
 
     <button class="logout-button" :disabled="authStore.loading" @tap="confirmLogout">退出登录</button>
@@ -66,13 +74,17 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
+import { appConfig } from "@/config";
+import { checkAppUpdate, downloadAndInstallUpdate, type AvailableAppUpdate } from "@/services/app-update";
 import { useAuthStore } from "@/stores/auth";
 import { usePetStore } from "@/stores/pet";
 
 const authStore = useAuthStore();
 const petStore = usePetStore();
+const checkingUpdate = ref(false);
 const avatarInitial = computed(() => (authStore.username ? authStore.username.slice(0, 1).toUpperCase() : "我"));
+const updateDescription = computed(() => `当前版本 ${appConfig.version}，点击检查新版本`);
 
 function goProfile() {
   uni.switchTab({ url: "/pages/profile/index" });
@@ -84,6 +96,67 @@ function goCheckIn() {
 
 function goShop() {
   uni.switchTab({ url: "/pages/shop/index" });
+}
+
+async function handleCheckUpdate() {
+  if (checkingUpdate.value) {
+    return;
+  }
+
+  checkingUpdate.value = true;
+  uni.showLoading({ title: "检查中", mask: true });
+
+  try {
+    const result = await checkAppUpdate();
+    uni.hideLoading();
+
+    if (result.status === "available") {
+      showUpdateModal(result.update);
+      return;
+    }
+
+    const messageMap = {
+      "not-configured": "还没有配置更新地址，打包发布前请先设置 VITE_APP_UPDATE_MANIFEST_URL。",
+      "unsupported-platform": "当前平台暂不支持应用内更新，请在 Android App 内检查。",
+      "up-to-date": "已经是最新版本啦。",
+    } as const;
+
+    uni.showToast({ title: messageMap[result.status], icon: "none" });
+  } catch (error) {
+    uni.hideLoading();
+    uni.showToast({ title: error instanceof Error ? error.message : "检查更新失败", icon: "none" });
+  } finally {
+    checkingUpdate.value = false;
+  }
+}
+
+function showUpdateModal(update: AvailableAppUpdate) {
+  const notes = update.notes.length ? `\n\n${update.notes.map((item) => `· ${item}`).join("\n")}` : "";
+
+  uni.showModal({
+    title: update.title,
+    content: `发现版本 ${update.versionName}${notes}`,
+    showCancel: !update.force,
+    confirmText: update.force ? "立即更新" : "更新",
+    success(result) {
+      if (result.confirm) {
+        installUpdate(update);
+      }
+    },
+  });
+}
+
+async function installUpdate(update: AvailableAppUpdate) {
+  uni.showLoading({ title: "下载中", mask: true });
+
+  try {
+    await downloadAndInstallUpdate(update);
+    uni.hideLoading();
+    uni.showToast({ title: "安装完成", icon: "none" });
+  } catch (error) {
+    uni.hideLoading();
+    uni.showToast({ title: error instanceof Error ? error.message : "安装更新失败", icon: "none" });
+  }
 }
 
 function confirmLogout() {
@@ -254,6 +327,10 @@ function confirmLogout() {
   border-top: 0;
 }
 
+.menu-row.disabled {
+  opacity: 0.62;
+}
+
 .menu-icon {
   flex: none;
   width: 74rpx;
@@ -276,6 +353,10 @@ function confirmLogout() {
 
 .shop-icon {
   background: linear-gradient(135deg, #7c2d12, #f97316);
+}
+
+.update-icon {
+  background: linear-gradient(135deg, #24515a, #22c55e);
 }
 
 .menu-copy {

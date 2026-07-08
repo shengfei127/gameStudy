@@ -79,6 +79,25 @@ VITE_STUDY_PET_PROXY_URL=/api/study-pet
 
 `npm run build:app-plus` 会在 `dist/build/app` 生成 App-Plus 打包资源。真机运行、云打包 APK、证书、DCloud AppID、Android 包名等配置，建议用 HBuilderX 打开本项目或导入 `dist/build/app` 后继续完善。
 
+## 应用内更新
+
+“我的”页已经提供“检查更新”入口。发布新版给已安装用户时，需要先提高 `src/manifest.json` 的 `versionName` 和 `versionCode`，重新打包 APK 或 WGT，然后把更新包上传到一个 HTTPS 地址，并让 `VITE_APP_UPDATE_MANIFEST_URL` 指向远程版本清单。
+
+示例 `version.json`：
+
+```json
+{
+  "versionName": "0.2.0",
+  "versionCode": 20,
+  "platforms": ["android"],
+  "downloadUrl": "https://example.com/study-pet/study-pet-0.2.0.apk",
+  "changelog": ["新增应用内检查更新", "优化收藏馆展示"],
+  "force": false
+}
+```
+
+字段说明：`versionCode` 必须大于当前安装包才会提示更新；`downloadUrl` 可以是 APK，也可以是 WGT 热更新包；`force: true` 会隐藏取消按钮。Android APK 安装已在 `src/manifest.json` 中加入安装包权限，首次从应用内安装时，系统仍可能要求用户允许“安装未知应用”。
+
 ## 后续开发建议
 
 1. 增加计时器模式，让学习过程有进行中的成长反馈。
