@@ -16,7 +16,7 @@
 
     <scroll-view v-else class="content" scroll-y enhanced :show-scrollbar="false">
       <view class="hero-card">
-        <image class="hero-bg" :src="adultAsset" mode="aspectFill" />
+        <image class="hero-bg" src="/static/profile-stage/growth-archive-empty-stage.png" mode="aspectFill" />
         <view class="hero-scrim" />
         <view class="hero-top">
           <view>
@@ -32,7 +32,11 @@
 
         <view class="hero-avatar">
           <view class="avatar-ring" />
-          <PetAvatar :egg-id="progress.eggId" :stage-id="petStore.stage.id" size="large" />
+          <view class="archive-portrait">
+            <image class="archive-pet-image" :src="archivePetSrc" mode="aspectFill" />
+            <view class="archive-pet-shine" />
+          </view>
+          <view class="avatar-shelf" />
         </view>
 
         <view class="growth-panel">
@@ -117,12 +121,10 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import PetAvatar from "@/components/PetAvatar.vue";
 import {
   EVOLUTION_STAGES,
   SHOP_ITEMS,
   getEggOption,
-  getPetAssetPath,
   getPetStageAssetPath,
   getShopItem,
   type EggOption,
@@ -134,7 +136,7 @@ const petStore = usePetStore();
 const progress = computed(() => petStore.progress);
 const evolutionStages = EVOLUTION_STAGES;
 const activeEgg = computed(() => (progress.value ? getEggOption(progress.value.eggId) : null));
-const adultAsset = computed(() => (progress.value ? getPetAssetPath(progress.value.eggId, "adult") : ""));
+const archivePetSrc = computed(() => (progress.value ? getPetStageAssetPath(progress.value.eggId, petStore.stage.id) : ""));
 const displayName = computed(() =>
   progress.value && activeEgg.value && petStore.stage.id === "guardian" ? activeEgg.value.adultName : progress.value?.petName,
 );
@@ -326,9 +328,9 @@ function hexToRgb(hex: string) {
   min-height: 590rpx;
   border-radius: 32rpx;
   padding: 28rpx;
-  background: #111827;
+  background: #100d0a;
   color: #ffffff;
-  box-shadow: 0 28rpx 70rpx rgba(26, 44, 64, 0.22);
+  box-shadow: 0 28rpx 70rpx rgba(26, 21, 15, 0.24);
 }
 
 .hero-bg {
@@ -336,17 +338,17 @@ function hexToRgb(hex: string) {
   inset: 0;
   width: 100%;
   height: 100%;
-  opacity: 0.72;
-  filter: saturate(1.2) contrast(1.18) brightness(0.7);
+  opacity: 1;
+  filter: saturate(1.04) contrast(1.03) brightness(0.76);
 }
 
 .hero-scrim {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 58% 42%, rgba(var(--accent-rgb, 47, 133, 90), 0.42), transparent 36%),
-    linear-gradient(180deg, rgba(5, 8, 12, 0.28), rgba(5, 8, 12, 0.84)),
-    linear-gradient(90deg, rgba(5, 8, 12, 0.74), rgba(5, 8, 12, 0.18));
+    radial-gradient(ellipse at 54% 48%, transparent 0 42%, rgba(5, 8, 12, 0.22) 76%),
+    linear-gradient(180deg, rgba(5, 8, 12, 0.12), rgba(5, 8, 12, 0.72)),
+    linear-gradient(90deg, rgba(5, 8, 12, 0.7), rgba(5, 8, 12, 0.12) 50%, rgba(5, 8, 12, 0.22));
 }
 
 .hero-top,
@@ -412,20 +414,116 @@ function hexToRgb(hex: string) {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 330rpx;
+  min-height: 350rpx;
+  margin-top: -4rpx;
 }
 
 .avatar-ring {
   position: absolute;
-  width: 330rpx;
-  height: 330rpx;
-  border: 1rpx solid rgba(255, 255, 255, 0.18);
+  bottom: 18rpx;
+  width: 486rpx;
+  height: 248rpx;
+  border: 0;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(var(--accent-rgb, 47, 133, 90), 0.24), transparent 68%);
+  background:
+    radial-gradient(ellipse at 50% 42%, rgba(255, 250, 218, 0.28), transparent 54%),
+    radial-gradient(ellipse at 50% 82%, rgba(255, 185, 92, 0.22), transparent 70%);
+  opacity: 0.72;
+  filter: blur(4rpx);
 }
 
-.hero-avatar .pet-avatar {
+.archive-portrait {
+  position: relative;
+  z-index: 2;
+  overflow: hidden;
+  width: 354rpx;
+  height: 354rpx;
+  border: 2rpx solid rgba(237, 219, 183, 0.68);
+  border-radius: 34rpx;
+  background:
+    radial-gradient(circle at 74% 12%, rgba(255, 249, 224, 0.72), transparent 28%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.46), rgba(255, 255, 255, 0.13)),
+    rgba(255, 255, 255, 0.18);
+  box-shadow:
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.74),
+    inset 0 -26rpx 42rpx rgba(55, 36, 24, 0.18),
+    0 24rpx 42rpx rgba(0, 0, 0, 0.28);
+}
+
+.archive-portrait::before,
+.archive-portrait::after {
+  position: absolute;
+  content: "";
+  pointer-events: none;
+}
+
+.archive-portrait::before {
+  inset: 14rpx;
+  z-index: 3;
+  border: 1rpx solid rgba(255, 235, 188, 0.3);
+  border-radius: 26rpx;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 22%, transparent 74%, rgba(8, 11, 16, 0.18)),
+    radial-gradient(ellipse at 50% 50%, transparent 58%, rgba(9, 11, 18, 0.18) 100%);
+  box-shadow:
+    inset 0 0 36rpx rgba(255, 235, 188, 0.12),
+    inset 0 -18rpx 28rpx rgba(8, 11, 16, 0.1);
+}
+
+.archive-portrait::after {
+  top: 0;
+  bottom: 0;
+  left: -28%;
+  z-index: 4;
+  width: 56%;
+  background: linear-gradient(105deg, rgba(255, 255, 255, 0.32), transparent 62%);
+  opacity: 0.52;
+  transform: skewX(-12deg);
+}
+
+.archive-pet-image {
+  position: absolute;
+  inset: 14rpx;
+  z-index: 2;
+  width: calc(100% - 28rpx);
+  height: calc(100% - 28rpx);
+  border-radius: 24rpx;
+  opacity: 1;
+  filter:
+    saturate(1.08)
+    contrast(1.04)
+    brightness(0.98)
+    drop-shadow(0 20rpx 24rpx rgba(0, 0, 0, 0.24));
+}
+
+.archive-pet-shine {
+  position: absolute;
+  top: 18rpx;
+  right: 20rpx;
+  z-index: 4;
+  width: 138rpx;
+  height: 78rpx;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.46), transparent 66%);
+  filter: blur(2rpx);
+  opacity: 0.44;
+  transform: rotate(-14deg);
+  pointer-events: none;
+}
+
+.avatar-shelf {
+  position: absolute;
+  right: 148rpx;
+  bottom: 8rpx;
+  left: 148rpx;
   z-index: 1;
+  height: 40rpx;
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse at center, rgba(8, 11, 16, 0.28), transparent 64%),
+    radial-gradient(ellipse at center, rgba(255, 226, 165, 0.24), rgba(255, 178, 78, 0.14) 42%, transparent 72%);
+  filter: blur(4rpx);
+  opacity: 0.86;
 }
 
 .growth-panel {
