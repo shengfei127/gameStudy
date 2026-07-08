@@ -2,7 +2,7 @@
   <view class="page" :style="pageStyle">
     <view v-if="!progress" class="empty">
       <view class="empty-card">
-        <image class="empty-backdrop" src="/static/pets/zodiac_dragon-adult.webp" mode="aspectFill" />
+        <image class="empty-backdrop" src="/static/profile-stage/growth-archive-initial-bg.webp" mode="aspectFill" />
         <view class="empty-shade" />
         <view class="empty-orbit" />
         <view class="empty-copy">
@@ -252,20 +252,19 @@ function hexToRgb(hex: string) {
 
 .empty-backdrop {
   position: absolute;
-  right: -210rpx;
-  bottom: -120rpx;
-  width: 880rpx;
-  height: 980rpx;
-  opacity: 0.56;
-  filter: saturate(1.12) contrast(1.08) brightness(0.64);
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 1;
+  filter: saturate(1.05) contrast(1.04) brightness(1);
 }
 
 .empty-shade {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(90deg, rgba(8, 12, 18, 0.94), rgba(8, 12, 18, 0.7) 52%, rgba(8, 12, 18, 0.34)),
-    linear-gradient(180deg, rgba(8, 12, 18, 0.12), rgba(8, 12, 18, 0.92));
+    linear-gradient(90deg, rgba(5, 13, 14, 0.68), rgba(5, 13, 14, 0.3) 56%, rgba(5, 13, 14, 0.08)),
+    linear-gradient(180deg, rgba(5, 10, 13, 0.16), rgba(5, 10, 13, 0.08) 44%, rgba(5, 10, 13, 0.34));
 }
 
 .empty-orbit {
@@ -274,7 +273,7 @@ function hexToRgb(hex: string) {
   bottom: 62rpx;
   width: 560rpx;
   height: 560rpx;
-  border: 2rpx solid rgba(255, 255, 255, 0.12);
+  border: 2rpx solid rgba(255, 236, 184, 0.1);
   border-radius: 50%;
 }
 
