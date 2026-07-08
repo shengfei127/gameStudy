@@ -1,9 +1,13 @@
 <template>
   <view class="page">
     <view v-if="!petStore.progress" class="empty">
-      <text class="empty-title">先选择宠物蛋</text>
-      <text class="empty-copy">有了学习伙伴后，每次真实学习都能转化为积分。</text>
-      <button class="primary-button ready" @tap="goHome">去选择</button>
+      <image class="empty-backdrop" src="/static/tools/checkin-initial-bg.webp" mode="aspectFill" />
+      <view class="empty-shade" />
+      <view class="empty-copywrap">
+        <text class="empty-title">先选择宠物蛋</text>
+        <text class="empty-copy">有了学习伙伴后，每次真实学习都能转化为积分。</text>
+        <button class="primary-button ready empty-button" @tap="goHome">去选择</button>
+      </view>
     </view>
 
     <view v-else class="content">
@@ -268,9 +272,44 @@ function clampMinutes(value: number) {
 }
 
 .empty {
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
   justify-content: center;
-  min-height: 70vh;
+  min-height: calc(100vh - var(--window-bottom) - 56rpx);
+  padding: 58rpx 42rpx;
+  border: 1rpx solid rgba(190, 221, 205, 0.5);
+  border-radius: 32rpx;
+  background: #f4fbf6;
   text-align: center;
+  box-shadow: 0 24rpx 62rpx rgba(47, 133, 90, 0.12);
+}
+
+.empty-backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 1;
+  filter: saturate(1.04) contrast(1.02) brightness(1.02);
+}
+
+.empty-shade {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 46%, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.48) 28%, transparent 48%),
+    linear-gradient(180deg, rgba(248, 255, 251, 0.6), rgba(248, 255, 251, 0.16) 42%, rgba(248, 255, 251, 0.5));
+}
+
+.empty-copywrap {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24rpx;
+  transform: translateY(-18rpx);
 }
 
 .empty-title {
@@ -280,9 +319,15 @@ function clampMinutes(value: number) {
 }
 
 .empty-copy {
+  max-width: 520rpx;
   color: #66758a;
   font-size: 28rpx;
   line-height: 1.5;
+}
+
+.empty-button {
+  width: 250rpx;
+  margin-top: 46rpx;
 }
 
 .summary {
