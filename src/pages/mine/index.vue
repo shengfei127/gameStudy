@@ -1,7 +1,7 @@
 <template>
   <view class="page">
     <view class="hero">
-      <image class="hero-bg" src="/static/pets/lotusguard-adult.webp" mode="aspectFill" />
+      <image class="hero-bg" src="/static/mine/account-hero-bg.webp" mode="aspectFill" />
       <view class="hero-shade" />
       <view class="account">
         <view class="avatar">
@@ -132,17 +132,17 @@ function confirmLogout() {
   inset: 0;
   width: 100%;
   height: 100%;
-  opacity: 0.66;
-  filter: saturate(1.16) contrast(1.14) brightness(0.7);
+  opacity: 0.98;
+  filter: saturate(1.05) contrast(1.05) brightness(0.9);
 }
 
 .hero-shade {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 70% 38%, rgba(94, 234, 212, 0.38), transparent 34%),
-    linear-gradient(90deg, rgba(9, 35, 31, 0.88), rgba(9, 35, 31, 0.32)),
-    linear-gradient(180deg, transparent, rgba(6, 14, 13, 0.86));
+    radial-gradient(circle at 76% 36%, rgba(108, 255, 218, 0.18), transparent 34%),
+    linear-gradient(90deg, rgba(5, 24, 22, 0.78), rgba(5, 24, 22, 0.18) 58%, rgba(5, 24, 22, 0.1)),
+    linear-gradient(180deg, rgba(4, 11, 10, 0.04), rgba(4, 11, 10, 0.56));
 }
 
 .account {
