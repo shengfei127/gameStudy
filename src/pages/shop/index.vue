@@ -1122,7 +1122,7 @@ function hexToRgb(hex: string) {
 }
 
 .content {
-  padding: 22rpx 26rpx 120rpx;
+  padding: 22rpx 26rpx 0;
 }
 
 .preview-stage {
@@ -2282,6 +2282,6 @@ function hexToRgb(hex: string) {
 }
 
 .bottom-space {
-  height: 150rpx;
+  height: 36rpx;
 }
 </style>

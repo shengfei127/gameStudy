@@ -809,6 +809,6 @@ function hexToRgb(hex: string) {
 }
 
 .bottom-space {
-  height: 140rpx;
+  height: 36rpx;
 }
 </style>
