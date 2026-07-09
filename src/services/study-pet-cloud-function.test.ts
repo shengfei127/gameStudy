@@ -130,6 +130,30 @@ describe("study-pet cloud function auth", () => {
         },
       },
     });
+    await main({
+      action: "checkIn",
+      payload: {
+        clientId: "student-device",
+        input: {
+          subject: "数学",
+          minutes: 60,
+          focusLevel: 1,
+          photoPath: "cloud://study/math.jpg",
+        },
+      },
+    });
+    await main({
+      action: "checkIn",
+      payload: {
+        clientId: "student-device",
+        input: {
+          subject: "语文",
+          minutes: 60,
+          focusLevel: 2,
+          photoPath: "cloud://study/chinese.jpg",
+        },
+      },
+    });
 
     const bought = await main({
       action: "buyShopItem",
@@ -148,7 +172,7 @@ describe("study-pet cloud function auth", () => {
 
     expect(bought.success).toBe(true);
     expect(bought.data.item.name).toBe("专注台灯");
-    expect(bought.data.progress.points).toBe(52);
+    expect(bought.data.progress.points).toBe(10);
     expect(equipped.success).toBe(true);
     expect(equipped.data.progress.equippedItems.lamp).toBe("focus_lamp");
   });

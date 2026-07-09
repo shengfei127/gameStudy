@@ -40,26 +40,6 @@
           <text class="subject-progress">今日已完成 {{ checkedSubjectsToday.length }}/{{ subjects.length }} 科</text>
         </view>
 
-        <view class="field compact-field">
-          <view class="field-copy">
-            <text class="field-title">学习时长</text>
-            <text class="field-hint">5-240 分钟</text>
-          </view>
-          <view class="duration-control">
-            <button class="step-button" @tap="adjustMinutes(-5)">-</button>
-            <view class="duration-box">
-              <input
-                v-model.number="minutes"
-                class="duration-input"
-                type="number"
-                @blur="normalizeMinutes"
-              />
-              <text class="duration-unit">分钟</text>
-            </view>
-            <button class="step-button" @tap="adjustMinutes(5)">+</button>
-          </view>
-        </view>
-
         <view class="field">
           <view class="field-head">
             <text class="field-title">打卡照片</text>
@@ -123,6 +103,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from "vue";
+import { STUDY_CHECK_IN_MINUTES, STUDY_CHECK_IN_REWARD } from "@/domain/pet";
 import { usePetStore } from "@/stores/pet";
 
 const petStore = usePetStore();
@@ -130,7 +111,6 @@ const subjects = ["语文", "数学", "英语"] as const;
 type StudySubject = (typeof subjects)[number];
 
 const subject = ref<StudySubject>("数学");
-const minutes = ref(25);
 const note = ref("");
 const photoPath = ref("");
 const recentLogs = computed(() => petStore.recentStudyLogs);
@@ -147,7 +127,7 @@ const submitLabel = computed(() => {
     return `今日${subject.value}已完成`;
   }
 
-  return canSubmit.value ? "完成打卡，领取积分" : "上传照片后打卡";
+  return canSubmit.value ? `完成打卡，领取${STUDY_CHECK_IN_REWARD}积分` : "上传照片后打卡";
 });
 
 function selectSubject(value: StudySubject) {
@@ -166,14 +146,6 @@ function selectFirstAvailableSubject() {
   if (nextSubject) {
     subject.value = nextSubject;
   }
-}
-
-function adjustMinutes(step: number) {
-  minutes.value = clampMinutes(Number(minutes.value || 0) + step);
-}
-
-function normalizeMinutes() {
-  minutes.value = clampMinutes(Number(minutes.value || 0));
 }
 
 function choosePhoto() {
@@ -228,7 +200,7 @@ async function submitCheckIn() {
     const uploadedPhotoPath = await petStore.uploadStudyPhoto(photoPath.value);
     const result = await petStore.checkIn({
       subject: subject.value,
-      minutes: Number(minutes.value),
+      minutes: STUDY_CHECK_IN_MINUTES,
       focusLevel: 2,
       photoPath: uploadedPhotoPath,
       note: note.value,
@@ -248,10 +220,6 @@ async function submitCheckIn() {
 
 function goHome() {
   uni.switchTab({ url: "/pages/home/index" });
-}
-
-function clampMinutes(value: number) {
-  return Math.min(240, Math.max(5, Math.round(value || 5)));
 }
 </script>
 
@@ -391,7 +359,6 @@ function clampMinutes(value: number) {
 }
 
 .field-head,
-.compact-field,
 .log-row,
 .proof-card,
 .upload-card {
@@ -483,70 +450,6 @@ function clampMinutes(value: number) {
   margin-top: 12rpx;
   color: #6d7b8d;
   font-size: 22rpx;
-  font-weight: 700;
-}
-
-.compact-field {
-  justify-content: space-between;
-  gap: 18rpx;
-}
-
-.field-copy {
-  min-width: 128rpx;
-}
-
-.field-copy .field-title,
-.field-copy .field-hint {
-  display: block;
-}
-
-.field-copy .field-hint {
-  margin-top: 6rpx;
-}
-
-.duration-control {
-  display: flex;
-  min-width: 0;
-  flex: 1;
-  align-items: center;
-  gap: 12rpx;
-}
-
-.step-button {
-  flex: none;
-  width: 72rpx;
-  height: 72rpx;
-  border-radius: 16rpx;
-  background: #1f3149;
-  color: #ffffff;
-  font-size: 34rpx;
-  font-weight: 900;
-  line-height: 72rpx;
-}
-
-.duration-box {
-  display: flex;
-  min-width: 0;
-  flex: 1;
-  align-items: center;
-  justify-content: center;
-  gap: 8rpx;
-  height: 72rpx;
-  border-radius: 16rpx;
-  background: #f6faf7;
-}
-
-.duration-input {
-  width: 92rpx;
-  color: #17233a;
-  font-size: 34rpx;
-  font-weight: 900;
-  text-align: center;
-}
-
-.duration-unit {
-  color: #6d7b8d;
-  font-size: 24rpx;
   font-weight: 700;
 }
 

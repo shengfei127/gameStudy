@@ -38,6 +38,8 @@ export type EggMotif =
   | "lotus"
   | "classic";
 export type FocusLevel = 1 | 2 | 3;
+export const STUDY_CHECK_IN_MINUTES = 30;
+export const STUDY_CHECK_IN_REWARD = 30;
 
 export interface EggOption {
   id: EggId;
@@ -728,12 +730,6 @@ export const SHOP_ITEMS: ShopItem[] = [
   },
 ];
 
-const FOCUS_BONUS: Record<FocusLevel, number> = {
-  1: 0,
-  2: 5,
-  3: 12,
-};
-
 export function createInitialProgress(eggId: EggId): PetProgress {
   const egg = getEggOption(eggId);
 
@@ -760,7 +756,7 @@ export function calculateStudyReward(input: Pick<StudyInput, "minutes" | "focusL
     photoPath: "reward-preview",
   });
 
-  return input.minutes * 2 + FOCUS_BONUS[input.focusLevel];
+  return STUDY_CHECK_IN_REWARD;
 }
 
 export function recordStudySession(progress: PetProgress, input: StudyInput, now = new Date()) {

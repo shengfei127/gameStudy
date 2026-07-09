@@ -332,11 +332,7 @@ const EVOLUTION_STAGES = [
   },
 ];
 
-const FOCUS_BONUS = {
-  1: 0,
-  2: 5,
-  3: 12,
-};
+const STUDY_CHECK_IN_REWARD = 30;
 
 exports.main = async (event) => {
   try {
@@ -689,7 +685,7 @@ function normalizePetProgress(progress) {
 }
 
 function calculateStudyReward(input) {
-  return input.minutes * 2 + FOCUS_BONUS[input.focusLevel];
+  return STUDY_CHECK_IN_REWARD;
 }
 
 function validateStudyInput(input) {

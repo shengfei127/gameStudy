@@ -30,7 +30,7 @@ describe("pet api local adapter", () => {
       photoPath: "cloud://study/math.jpg",
     });
 
-    expect(result.reward).toBe(55);
+    expect(result.reward).toBe(30);
     expect(result.progress.studyLogs[0].photoPath).toBe("cloud://study/math.jpg");
     await expect(
       api.recordCheckIn({
@@ -55,6 +55,12 @@ describe("pet api local adapter", () => {
       focusLevel: 3,
       photoPath: "cloud://study/chinese.jpg",
     });
+    await api.recordCheckIn({
+      subject: "数学",
+      minutes: 60,
+      focusLevel: 1,
+      photoPath: "cloud://study/math.jpg",
+    });
     const result = await api.feed("focus_biscuit");
 
     expect(result.item.name).toBe("专注能量块");
@@ -76,11 +82,23 @@ describe("pet api local adapter", () => {
       focusLevel: 3,
       photoPath: "cloud://study/english.jpg",
     });
+    await api.recordCheckIn({
+      subject: "数学",
+      minutes: 60,
+      focusLevel: 1,
+      photoPath: "cloud://study/math.jpg",
+    });
+    await api.recordCheckIn({
+      subject: "语文",
+      minutes: 60,
+      focusLevel: 2,
+      photoPath: "cloud://study/chinese.jpg",
+    });
     const bought = await api.buyShopItem("focus_lamp");
     const equipped = await api.equipShopItem("focus_lamp");
 
     expect(bought.item.name).toBe("专注台灯");
-    expect(bought.progress.points).toBe(52);
+    expect(bought.progress.points).toBe(10);
     expect(equipped.item.slot).toBe("lamp");
     expect(equipped.progress.equippedItems.lamp).toBe("focus_lamp");
   });

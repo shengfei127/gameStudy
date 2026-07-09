@@ -50,9 +50,9 @@ describe("pet study growth rules", () => {
     expect(getPetStageAssetPath("zodiac_dragon", "guardian")).toBe("/static/pets/zodiac_dragon-adult.webp");
   });
 
-  test("rewards focused study by minutes and focus level", () => {
-    expect(calculateStudyReward({ minutes: 25, focusLevel: 3 })).toBe(62);
-    expect(calculateStudyReward({ minutes: 10, focusLevel: 1 })).toBe(20);
+  test("rewards every check-in with a fixed 30 points", () => {
+    expect(calculateStudyReward({ minutes: 25, focusLevel: 3 })).toBe(30);
+    expect(calculateStudyReward({ minutes: 10, focusLevel: 1 })).toBe(30);
   });
 
   test("records study sessions and starts a daily streak once per day", () => {
@@ -63,7 +63,7 @@ describe("pet study growth rules", () => {
       new Date("2026-07-06T08:00:00"),
     );
 
-    expect(result.progress.points).toBe(65);
+    expect(result.progress.points).toBe(30);
     expect(result.progress.streak).toBe(1);
     expect(result.progress.totalStudyMinutes).toBe(30);
     expect(result.progress.studyLogs).toHaveLength(1);
@@ -117,14 +117,19 @@ describe("pet study growth rules", () => {
   });
 
   test("feeding spends points, grows the pet, and unlocks evolution stages", () => {
-    const studied = recordStudySession(
+    const firstStudy = recordStudySession(
       createInitialProgress("aurora"),
       { subject: "科学", minutes: 60, focusLevel: 3, photoPath: "/tmp/science.jpg" },
       new Date("2026-07-06T08:00:00"),
     ).progress;
+    const studied = recordStudySession(
+      firstStudy,
+      { subject: "英语", minutes: 60, focusLevel: 1, photoPath: "/tmp/english.jpg" },
+      new Date("2026-07-06T20:00:00"),
+    ).progress;
     const fed = feedPet(studied, "focus_biscuit").progress;
 
-    expect(fed.points).toBe(72);
+    expect(fed.points).toBe(0);
     expect(fed.growth).toBe(88);
     expect(getEvolutionStage(fed.growth).id).toBe("hatchling");
   });
