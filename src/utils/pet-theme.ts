@@ -28,6 +28,7 @@ const THEME_OVERRIDES: Partial<Record<EggId, EggTheme>> = {
   crimson_phoenix: { dark: "#240606", deep: "#5f1212", mid: "#dc2626", light: "#fff1e7", hot: "#f97316", soft: "#fff5f0" },
   ruby_kirin: { dark: "#2a0710", deep: "#5b1020", mid: "#be123c", light: "#fff1f2", hot: "#fb7185", soft: "#fff5f7" },
   violet_fox: { dark: "#1a0b2f", deep: "#3b1764", mid: "#7e22ce", light: "#faf5ff", hot: "#c084fc", soft: "#f8f0ff" },
+  nebula_deer: { dark: "#120b2f", deep: "#2e1a60", mid: "#6d28d9", light: "#f5f3ff", hot: "#a78bfa", soft: "#f5f1ff" },
   lotusguard: { dark: "#09231f", deep: "#17433d", mid: "#14b8a6", light: "#effffb", hot: "#5eead4", soft: "#effbf8" },
   aurora: { dark: "#321807", deep: "#4d2c17", mid: "#ff8a4d", light: "#fff4db", hot: "#ffd166", soft: "#fff8e9" },
   sprout: { dark: "#0c2418", deep: "#1c3f2b", mid: "#31b56a", light: "#ecfff2", hot: "#86efac", soft: "#f0fbf3" },

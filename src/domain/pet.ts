@@ -18,6 +18,7 @@ export type EggId =
   | "crimson_phoenix"
   | "ruby_kirin"
   | "violet_fox"
+  | "nebula_deer"
   | "aurora"
   | "sprout"
   | "tide";
@@ -42,6 +43,7 @@ export type EggMotif =
   | "phoenix"
   | "kirin"
   | "fox"
+  | "deer"
   | "classic";
 export type FocusLevel = 1 | 2 | 3;
 export const STUDY_CHECK_IN_MINUTES = 30;
@@ -418,6 +420,19 @@ const mythEggs: EggOption[] = [
     iconLabel: "狐",
     motif: "fox",
     palette: { shell: "#f3e8ff", accent: "#7e22ce", body: "#c084fc", glow: "#faf5ff", ink: "#3b1764" },
+  },
+  {
+    id: "nebula_deer",
+    category: "myth",
+    name: "星云鹿蛋",
+    petName: "星云幼鹿",
+    adultName: "星云鹿灵",
+    archetype: "神话灵感 · 星云鹿",
+    trait: "温和、耐心，适合长期计划和知识整理。",
+    studyStyle: "长期计划、知识整理",
+    iconLabel: "鹿",
+    motif: "deer",
+    palette: { shell: "#ede9fe", accent: "#6d28d9", body: "#a78bfa", glow: "#f5f3ff", ink: "#2e1a60" },
   },
   {
     id: "lotusguard",

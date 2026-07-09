@@ -108,6 +108,32 @@ describe("study-pet cloud function auth", () => {
     expect(secondProgress.data.eggId).toBe("zodiac_dragon");
   });
 
+  test("chooses newly added myth partners in cloud-backed progress", async () => {
+    const { main } = loadCloudFunction();
+    const partners = [
+      ["crimson_phoenix", "赤焰幼凤"],
+      ["ruby_kirin", "红玉幼麟"],
+      ["violet_fox", "紫曜灵狐"],
+      ["nebula_deer", "星云幼鹿"],
+    ];
+
+    for (const [eggId, petName] of partners) {
+      const chosen = await main({
+        action: "chooseEgg",
+        payload: {
+          clientId: `new-myth-partner-device-${eggId}`,
+          eggId,
+        },
+      });
+
+      expect(chosen.success).toBe(true);
+      expect(chosen.data).toMatchObject({
+        eggId,
+        petName,
+      });
+    }
+  });
+
   test("buys and equips shop items in cloud-backed progress", async () => {
     const { main } = loadCloudFunction();
 
