@@ -111,6 +111,10 @@ export type ShopItemId =
   | "perfect_aura"
   | "spark_effect"
   | "cloud_effect"
+  | "crimson_focus_band"
+  | "ruby_wing_cape"
+  | "violet_quill"
+  | "nebula_orbit"
   | "forest_wall"
   | "dragon_wall"
   | "moon_window"
@@ -120,7 +124,11 @@ export type ShopItemId =
   | "trophy_shelf"
   | "tomato_clock"
   | "star_floor"
-  | "cloud_floor";
+  | "cloud_floor"
+  | "ruby_study_wall"
+  | "crimson_lantern"
+  | "violet_window"
+  | "amethyst_floor";
 export type ShopItemCategory = "outfit" | "room";
 export type ShopItemSlot =
   | "head"
@@ -609,6 +617,54 @@ export const SHOP_ITEMS: ShopItem[] = [
     description: "低调但高级的陪伴特效，适合长期坚持型学生。",
   },
   {
+    id: "crimson_focus_band",
+    category: "outfit",
+    slot: "head",
+    name: "赤焰专注带",
+    shortName: "赤焰带",
+    cost: 100,
+    rarity: "rare",
+    theme: "#dc2626",
+    accent: "#fecaca",
+    description: "红色系头饰，适合冲刺日给伙伴加一点热血状态。",
+  },
+  {
+    id: "ruby_wing_cape",
+    category: "outfit",
+    slot: "back",
+    name: "红晶翼披",
+    shortName: "红晶翼",
+    cost: 170,
+    rarity: "epic",
+    theme: "#b91c1c",
+    accent: "#fb7185",
+    description: "像红宝石羽翼一样展开，让伙伴更有守护气场。",
+  },
+  {
+    id: "violet_quill",
+    category: "outfit",
+    slot: "hand",
+    name: "紫晶羽笔",
+    shortName: "紫晶笔",
+    cost: 130,
+    rarity: "rare",
+    theme: "#7e22ce",
+    accent: "#d8b4fe",
+    description: "紫色系手持物，适合阅读、摘抄和复盘时装备。",
+  },
+  {
+    id: "nebula_orbit",
+    category: "outfit",
+    slot: "effect",
+    name: "星云轨迹",
+    shortName: "星云",
+    cost: 190,
+    rarity: "epic",
+    theme: "#581c87",
+    accent: "#c084fc",
+    description: "紫色星云粒子围绕伙伴旋转，完成感更强。",
+  },
+  {
     id: "forest_wall",
     category: "room",
     slot: "wall",
@@ -727,6 +783,54 @@ export const SHOP_ITEMS: ShopItem[] = [
     theme: "#0f766e",
     accent: "#99f6e4",
     description: "柔和干净的房间地面主题。",
+  },
+  {
+    id: "ruby_study_wall",
+    category: "room",
+    slot: "wall",
+    name: "红晶书墙",
+    shortName: "红晶墙",
+    cost: 150,
+    rarity: "rare",
+    theme: "#991b1b",
+    accent: "#fca5a5",
+    description: "红色系背景墙，让伙伴房间更有冲刺氛围。",
+  },
+  {
+    id: "crimson_lantern",
+    category: "room",
+    slot: "lamp",
+    name: "朱砂学灯",
+    shortName: "朱砂灯",
+    cost: 110,
+    rarity: "common",
+    theme: "#be123c",
+    accent: "#fecdd3",
+    description: "暖红色学习灯，适合晚间打卡后的房间光效。",
+  },
+  {
+    id: "violet_window",
+    category: "room",
+    slot: "window",
+    name: "紫藤星窗",
+    shortName: "紫藤窗",
+    cost: 170,
+    rarity: "rare",
+    theme: "#6d28d9",
+    accent: "#ddd6fe",
+    description: "紫色窗景，给房间增加一点安静的星夜感。",
+  },
+  {
+    id: "amethyst_floor",
+    category: "room",
+    slot: "floor",
+    name: "紫晶地毯",
+    shortName: "紫晶毯",
+    cost: 160,
+    rarity: "rare",
+    theme: "#4c1d95",
+    accent: "#c4b5fd",
+    description: "紫色系地面装饰，和星空、月夜主题很搭。",
   },
 ];
 

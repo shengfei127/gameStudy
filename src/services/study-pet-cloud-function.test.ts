@@ -176,6 +176,46 @@ describe("study-pet cloud function auth", () => {
     expect(equipped.success).toBe(true);
     expect(equipped.data.progress.equippedItems.lamp).toBe("focus_lamp");
   });
+
+  test("buys newly added shop items in cloud-backed progress", async () => {
+    const { main } = loadCloudFunction();
+
+    await main({
+      action: "chooseEgg",
+      payload: {
+        clientId: "new-shop-item-device",
+        eggId: "windfire",
+      },
+    });
+
+    for (const subject of ["english", "math", "reading", "science", "history"]) {
+      await main({
+        action: "checkIn",
+        payload: {
+          clientId: "new-shop-item-device",
+          input: {
+            subject,
+            minutes: 30,
+            focusLevel: 1,
+            photoPath: `cloud://study/${subject}.jpg`,
+          },
+        },
+      });
+    }
+
+    const bought = await main({
+      action: "buyShopItem",
+      payload: {
+        clientId: "new-shop-item-device",
+        itemId: "violet_quill",
+      },
+    });
+
+    expect(bought.success).toBe(true);
+    expect(bought.data.item.id).toBe("violet_quill");
+    expect(bought.data.progress.ownedItemIds).toContain("violet_quill");
+    expect(bought.data.progress.points).toBe(20);
+  });
 });
 
 function loadCloudFunction() {

@@ -240,6 +240,8 @@ const activeEgg = computed(() => (progress.value ? getEggOption(progress.value.e
 const ownedSet = computed(() => new Set(progress.value?.ownedItemIds || []));
 const equippedBySlot = computed(() => progress.value?.equippedItems || {});
 const visibleItems = computed(() => SHOP_ITEMS.filter((item) => item.category === activeCategory.value));
+const outfitItemCount = computed(() => SHOP_ITEMS.filter((item) => item.category === "outfit").length);
+const roomItemCount = computed(() => SHOP_ITEMS.filter((item) => item.category === "room").length);
 const isEggStage = computed(() => petStore.stage.id === "egg");
 const petPortraitSrc = computed(() =>
   progress.value ? getPetStageAssetPath(progress.value.eggId, petStore.stage.id) : "/static/pets/windfire-egg-cutout.webp",
@@ -254,12 +256,12 @@ const tabs = computed(() => [
   {
     key: "outfit" as const,
     title: "伙伴装扮",
-    count: `${petStore.outfitCollectionCount}/10`,
+    count: `${petStore.outfitCollectionCount}/${outfitItemCount.value}`,
   },
   {
     key: "room" as const,
     title: "房间装饰",
-    count: `${petStore.roomCollectionCount}/10`,
+    count: `${petStore.roomCollectionCount}/${roomItemCount.value}`,
   },
 ]);
 const visibleSlots: Array<{ key: ShopItemSlot; label: string }> = [

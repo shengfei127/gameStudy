@@ -15,6 +15,7 @@ import {
   getEvolutionStage,
   normalizePetProgress,
   recordStudySession,
+  type ShopItemId,
 } from "./pet";
 
 describe("pet study growth rules", () => {
@@ -150,8 +151,27 @@ describe("pet study growth rules", () => {
 
     expect(progress.ownedItemIds).toEqual([]);
     expect(progress.equippedItems).toEqual({});
-    expect(SHOP_ITEMS.length).toBeGreaterThanOrEqual(20);
+    expect(SHOP_ITEMS.length).toBeGreaterThanOrEqual(28);
     expect(getShopItemAssetPath("focus_lamp")).toBe("/static/shop-items/focus_lamp.webp");
+  });
+
+  test("adds red and purple shop items for outfit and room collections", () => {
+    const addedItems: ShopItemId[] = [
+      "crimson_focus_band",
+      "ruby_wing_cape",
+      "violet_quill",
+      "nebula_orbit",
+      "ruby_study_wall",
+      "crimson_lantern",
+      "violet_window",
+      "amethyst_floor",
+    ];
+    const addedItemSet: ReadonlySet<ShopItemId> = new Set(addedItems);
+
+    expect(SHOP_ITEMS.filter((item) => addedItemSet.has(item.id)).map((item) => item.id)).toEqual(addedItems);
+    expect(SHOP_ITEMS.filter((item) => addedItemSet.has(item.id) && item.category === "outfit")).toHaveLength(4);
+    expect(SHOP_ITEMS.filter((item) => addedItemSet.has(item.id) && item.category === "room")).toHaveLength(4);
+    expect(getShopItemAssetPath("ruby_study_wall")).toBe("/static/shop-items/ruby_study_wall.webp");
   });
 
   test("buys a shop item by spending points and adding it to the collection", () => {

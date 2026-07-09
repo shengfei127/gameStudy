@@ -2,16 +2,17 @@ import { defineConfig } from "vite";
 import type { Plugin } from "vite";
 import uni from "@dcloudio/vite-plugin-uni";
 import fs from "node:fs/promises";
+import type { IncomingMessage } from "node:http";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
 
-interface CloudFunctionEvent {
+export interface CloudFunctionEvent {
   action?: string;
   payload?: Record<string, unknown>;
 }
 
-interface CloudFunctionResponse<T = unknown> {
+export interface CloudFunctionResponse<T = unknown> {
   success: boolean;
   data?: T;
   message?: string;
@@ -37,7 +38,11 @@ export default defineConfig({
 
 function studyPetLocalProxy(): Plugin {
   const dataDir = path.join(projectRoot, ".local-data");
-  let invokeCloudFunction: CloudFunctionMain | null = null;
+  const functionPath = getStudyPetCloudFunctionPath();
+  const invokeCloudFunction = createReloadingCloudFunctionInvoker({
+    getVersion: () => getFileVersion(functionPath),
+    load: () => loadStudyPetCloudFunction(dataDir),
+  });
 
   return {
     name: "study-pet-local-proxy",
@@ -54,7 +59,6 @@ function studyPetLocalProxy(): Plugin {
 
         try {
           const event = parseCloudFunctionEvent(await readRequestBody(req));
-          invokeCloudFunction ||= loadStudyPetCloudFunction(dataDir);
           const result = await invokeCloudFunction(event);
           res.end(JSON.stringify(result));
         } catch (error) {
@@ -71,9 +75,28 @@ function studyPetLocalProxy(): Plugin {
   };
 }
 
+export function createReloadingCloudFunctionInvoker(options: {
+  getVersion: () => string | number | Promise<string | number>;
+  load: () => CloudFunctionMain;
+}): CloudFunctionMain {
+  let cachedVersion: string | number | null = null;
+  let cachedMain: CloudFunctionMain | null = null;
+
+  return async (event) => {
+    const nextVersion = await options.getVersion();
+
+    if (!cachedMain || cachedVersion !== nextVersion) {
+      cachedMain = options.load();
+      cachedVersion = nextVersion;
+    }
+
+    return cachedMain(event);
+  };
+}
+
 function loadStudyPetCloudFunction(dataDir: string): CloudFunctionMain {
   const require = createRequire(import.meta.url);
-  const functionPath = path.join(projectRoot, "uniCloud-alipay", "cloudfunctions", "study-pet", "index.js");
+  const functionPath = getStudyPetCloudFunctionPath();
   const globalWithUniCloud = globalThis as typeof globalThis & {
     uniCloud?: { database: () => ReturnType<typeof createLocalUniCloudDatabase> };
   };
@@ -94,6 +117,15 @@ function loadStudyPetCloudFunction(dataDir: string): CloudFunctionMain {
       delete globalWithUniCloud.uniCloud;
     }
   }
+}
+
+function getStudyPetCloudFunctionPath() {
+  return path.join(projectRoot, "uniCloud-alipay", "cloudfunctions", "study-pet", "index.js");
+}
+
+async function getFileVersion(filePath: string) {
+  const stats = await fs.stat(filePath);
+  return `${stats.mtimeMs}:${stats.size}`;
 }
 
 function createLocalUniCloudDatabase(dataDir: string) {
@@ -229,7 +261,7 @@ function parseCloudFunctionEvent(body: string): CloudFunctionEvent {
   return JSON.parse(body) as CloudFunctionEvent;
 }
 
-function readRequestBody(req: NodeJS.ReadableStream) {
+function readRequestBody(req: IncomingMessage) {
   return new Promise<string>((resolve, reject) => {
     let body = "";
 
