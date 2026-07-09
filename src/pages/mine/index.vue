@@ -12,7 +12,13 @@
           hover-class="mine-avatar-press"
           @tap="chooseAvatar"
         >
-          <image v-if="accountAvatarPath" class="mine-avatar-image" :src="accountAvatarPath" mode="aspectFill" />
+          <image
+            v-if="accountAvatarPath"
+            class="mine-avatar-image"
+            :src="accountAvatarPath"
+            mode="aspectFill"
+            @error="handleAvatarLoadError"
+          />
           <text v-else>{{ avatarInitial }}</text>
         </view>
         <view class="mine-account-copy">
@@ -130,6 +136,14 @@ function loadAccountAvatar() {
   accountAvatarPath.value = getAccountAvatarPath(avatarStorage, accountAvatarKey.value);
 }
 
+function handleAvatarLoadError() {
+  if (!accountAvatarPath.value) {
+    return;
+  }
+
+  accountAvatarPath.value = saveAccountAvatarPath(avatarStorage, accountAvatarKey.value, "");
+}
+
 function chooseAvatar() {
   if (choosingAvatar.value) {
     return;
@@ -170,6 +184,14 @@ function chooseAvatar() {
 }
 
 function persistAvatarFile(tempFilePath: string) {
+  if (isH5Runtime()) {
+    return persistAvatarForH5(tempFilePath);
+  }
+
+  return persistAvatarWithSaveFile(tempFilePath);
+}
+
+function persistAvatarWithSaveFile(tempFilePath: string) {
   return new Promise<string>((resolve) => {
     const saveFile = (uni as unknown as { saveFile?: typeof uni.saveFile }).saveFile;
 
@@ -188,6 +210,41 @@ function persistAvatarFile(tempFilePath: string) {
       },
     });
   });
+}
+
+function persistAvatarForH5(tempFilePath: string) {
+  return new Promise<string>((resolve, reject) => {
+    if (tempFilePath.startsWith("data:")) {
+      resolve(tempFilePath);
+      return;
+    }
+
+    if (typeof FileReader === "undefined") {
+      resolve(tempFilePath);
+      return;
+    }
+
+    fetch(tempFilePath)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("头像读取失败");
+        }
+        return response.blob();
+      })
+      .then((blob) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          resolve(typeof reader.result === "string" ? reader.result : tempFilePath);
+        };
+        reader.onerror = () => reject(new Error("头像读取失败"));
+        reader.readAsDataURL(blob);
+      })
+      .catch(reject);
+  });
+}
+
+function isH5Runtime() {
+  return typeof window !== "undefined" && typeof document !== "undefined";
 }
 
 function goProfile() {

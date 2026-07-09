@@ -28,4 +28,13 @@ describe("profile avatar storage", () => {
     expect(getAccountAvatarPath(storage, "")).toBe("");
     expect(getAccountAvatarPath(storage, "user-001")).toBe("");
   });
+
+  test("removes a previously saved avatar when saving an empty value", () => {
+    const storage = createMemoryStorage();
+
+    saveAccountAvatarPath(storage, "user-001", "file:///avatar-a.jpg");
+    saveAccountAvatarPath(storage, "user-001", "");
+
+    expect(getAccountAvatarPath(storage, "user-001")).toBe("");
+  });
 });
