@@ -4,8 +4,9 @@
       <image class="hero-bg" src="/static/mine/account-hero-bg.webp" mode="aspectFill" />
       <view class="hero-shade" />
       <view class="account">
-        <view class="avatar">
-          <text>{{ avatarInitial }}</text>
+        <view class="avatar" :class="{ 'avatar-with-image': Boolean(accountAvatarPath) }" hover-class="avatar-press" @tap="chooseAvatar">
+          <image v-if="accountAvatarPath" class="avatar-image" :src="accountAvatarPath" mode="aspectFill" />
+          <text v-else>{{ avatarInitial }}</text>
         </view>
         <view class="account-copy">
           <text class="eyebrow">MY ACCOUNT</text>
@@ -74,17 +75,90 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
+import { onShow } from "@dcloudio/uni-app";
 import { appConfig } from "@/config";
 import { checkAppUpdate, downloadAndInstallUpdate, type AvailableAppUpdate } from "@/services/app-update";
+import { createProfileAvatarStorage, getAccountAvatarPath, saveAccountAvatarPath } from "@/services/profile-avatar";
 import { useAuthStore } from "@/stores/auth";
 import { usePetStore } from "@/stores/pet";
 
 const authStore = useAuthStore();
 const petStore = usePetStore();
 const checkingUpdate = ref(false);
+const choosingAvatar = ref(false);
+const accountAvatarPath = ref("");
+const avatarStorage = createProfileAvatarStorage();
+const accountAvatarKey = computed(() => authStore.session?.userId || authStore.username || "guest");
 const avatarInitial = computed(() => (authStore.username ? authStore.username.slice(0, 1).toUpperCase() : "我"));
 const updateDescription = computed(() => `当前版本 ${appConfig.version}，点击检查新版本`);
+
+watch(accountAvatarKey, loadAccountAvatar, { immediate: true });
+onShow(loadAccountAvatar);
+
+function loadAccountAvatar() {
+  accountAvatarPath.value = getAccountAvatarPath(avatarStorage, accountAvatarKey.value);
+}
+
+function chooseAvatar() {
+  if (choosingAvatar.value) {
+    return;
+  }
+
+  choosingAvatar.value = true;
+
+  uni.chooseImage({
+    count: 1,
+    sizeType: ["compressed"],
+    sourceType: ["album", "camera"],
+    async success(result) {
+      const tempFilePath = result.tempFilePaths[0];
+
+      if (!tempFilePath) {
+        choosingAvatar.value = false;
+        return;
+      }
+
+      try {
+        const savedPath = await persistAvatarFile(tempFilePath);
+        accountAvatarPath.value = saveAccountAvatarPath(avatarStorage, accountAvatarKey.value, savedPath);
+        uni.showToast({ title: "头像已更新", icon: "none" });
+      } catch (error) {
+        uni.showToast({ title: error instanceof Error ? error.message : "头像更新失败", icon: "none" });
+      } finally {
+        choosingAvatar.value = false;
+      }
+    },
+    fail(error) {
+      choosingAvatar.value = false;
+
+      if (!String(error.errMsg || "").toLowerCase().includes("cancel")) {
+        uni.showToast({ title: "头像选择失败", icon: "none" });
+      }
+    },
+  });
+}
+
+function persistAvatarFile(tempFilePath: string) {
+  return new Promise<string>((resolve) => {
+    const saveFile = (uni as unknown as { saveFile?: typeof uni.saveFile }).saveFile;
+
+    if (!saveFile) {
+      resolve(tempFilePath);
+      return;
+    }
+
+    saveFile({
+      tempFilePath,
+      success(result) {
+        resolve(result.savedFilePath || tempFilePath);
+      },
+      fail() {
+        resolve(tempFilePath);
+      },
+    });
+  });
+}
 
 function goProfile() {
   uni.switchTab({ url: "/pages/profile/index" });
@@ -228,6 +302,8 @@ function confirmLogout() {
 }
 
 .avatar {
+  position: relative;
+  overflow: hidden;
   display: flex;
   flex: none;
   width: 104rpx;
@@ -241,6 +317,21 @@ function confirmLogout() {
   font-size: 42rpx;
   font-weight: 900;
   backdrop-filter: blur(12rpx);
+}
+
+.avatar-with-image {
+  border-color: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.avatar-press {
+  opacity: 0.82;
+  transform: scale(0.98);
+}
+
+.avatar-image {
+  width: 100%;
+  height: 100%;
 }
 
 .account-copy {
