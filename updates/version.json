@@ -1,13 +1,14 @@
 {
-  "versionName": "0.1.0",
-  "versionCode": 10,
+  "versionName": "0.1.1",
+  "versionCode": 11,
   "platforms": [
     "android",
     "app-plus"
   ],
-  "downloadUrl": "",
+  "downloadUrl": "https://github.com/shengfei127/gameStudy/releases/download/v0.1.1/study-pet-0.1.1.apk",
   "changelog": [
-    "Initialize in-app update manifest"
+    "优化应用页面展示和伙伴风格",
+    "修复已知问题并补充隐私合规配置"
   ],
   "force": false
 }

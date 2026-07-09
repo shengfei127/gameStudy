@@ -2,8 +2,8 @@
     "name" : "自律伙伴",
     "appid" : "__UNI__1250792",
     "description" : "一款用宠物养成督促学生主动学习的 uni-app 安卓应用。",
-    "versionName" : "0.1.0",
-    "versionCode" : "10",
+    "versionName" : "0.1.1",
+    "versionCode" : "11",
     "transformPx" : false,
     "app-plus" : {
         "usingComponents" : true,
