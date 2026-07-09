@@ -1,0 +1,33 @@
+{
+  "version": "1",
+  "prompt": "template",
+  "title": "服务协议和隐私政策",
+  "message": "欢迎使用自律伙伴。为了向你提供学习打卡、伙伴养成、积分商城、头像设置和应用更新等功能，我们会在必要范围内处理你的账号昵称、学习记录、积分记录、头像图片、设备标识、网络状态和操作日志，并可能申请相机、相册和网络权限。<br/><br/>请你阅读并了解<a href=\"static/legal/service.html\">《服务协议》</a>和<a href=\"static/legal/privacy.html\">《隐私政策》</a>。点击“同意并继续”表示你已阅读并同意全部内容。",
+  "buttonAccept": "同意并继续",
+  "buttonRefuse": "暂不同意",
+  "hrefLoader": "default",
+  "backToExit": "true",
+  "second": {
+    "title": "需要你的同意",
+    "message": "如果你不同意服务协议和隐私政策，我们将无法为你提供完整服务。你仍可以再次阅读<a href=\"static/legal/service.html\">《服务协议》</a>和<a href=\"static/legal/privacy.html\">《隐私政策》</a>后选择是否继续。",
+    "buttonAccept": "同意并继续",
+    "buttonRefuse": "退出应用"
+  },
+  "styles": {
+    "backgroundColor": "#FFF7FA",
+    "borderRadius": "12px",
+    "title": {
+      "color": "#22162B"
+    },
+    "buttonAccept": {
+      "color": "#FFFFFF",
+      "backgroundColor": "#D94A64",
+      "borderColor": "#D94A64"
+    },
+    "buttonRefuse": {
+      "color": "#7D4C60",
+      "backgroundColor": "#FFFFFF",
+      "borderColor": "#F0C6D5"
+    }
+  }
+}
