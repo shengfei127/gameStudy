@@ -89,7 +89,7 @@
 
           <view v-else class="upload-dropzone" @tap="choosePhoto">
             <view class="upload-icon-wrap">
-              <text class="upload-icon">+</text>
+              <view class="upload-icon" />
             </view>
             <view class="upload-copy">
               <text class="upload-title">上传学习照片</text>
@@ -698,10 +698,30 @@ function themeStyle(egg: EggOption) {
 }
 
 .upload-icon {
-  color: #ffffff;
-  font-size: 44rpx;
-  font-weight: 900;
-  line-height: 1;
+  position: relative;
+  width: 30rpx;
+  height: 30rpx;
+}
+
+.upload-icon::before,
+.upload-icon::after {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  border-radius: 999rpx;
+  background: #ffffff;
+  content: "";
+  transform: translate(-50%, -50%);
+}
+
+.upload-icon::before {
+  width: 30rpx;
+  height: 8rpx;
+}
+
+.upload-icon::after {
+  width: 8rpx;
+  height: 30rpx;
 }
 
 .upload-copy,
