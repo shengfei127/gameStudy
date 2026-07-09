@@ -15,6 +15,9 @@ export type EggId =
   | "moonjade"
   | "mechlion"
   | "lotusguard"
+  | "crimson_phoenix"
+  | "ruby_kirin"
+  | "violet_fox"
   | "aurora"
   | "sprout"
   | "tide";
@@ -36,6 +39,9 @@ export type EggMotif =
   | "lunar"
   | "lion"
   | "lotus"
+  | "phoenix"
+  | "kirin"
+  | "fox"
   | "classic";
 export type FocusLevel = 1 | 2 | 3;
 export const STUDY_CHECK_IN_MINUTES = 30;
@@ -373,6 +379,45 @@ const mythEggs: EggOption[] = [
     iconLabel: "狮",
     motif: "lion",
     palette: { shell: "#fff0cf", accent: "#dc2626", body: "#fbbf24", glow: "#fff8e6", ink: "#4a1d1d" },
+  },
+  {
+    id: "crimson_phoenix",
+    category: "myth",
+    name: "赤焰凤蛋",
+    petName: "赤焰幼凤",
+    adultName: "赤焰凤君",
+    archetype: "神话灵感 · 赤焰凤",
+    trait: "热烈、提气，适合错题攻坚和考前冲刺。",
+    studyStyle: "错题攻坚、考前冲刺",
+    iconLabel: "凤",
+    motif: "phoenix",
+    palette: { shell: "#fee2e2", accent: "#dc2626", body: "#f97316", glow: "#fff1e7", ink: "#5f1212" },
+  },
+  {
+    id: "ruby_kirin",
+    category: "myth",
+    name: "红玉麟蛋",
+    petName: "红玉幼麟",
+    adultName: "红玉麒麟",
+    archetype: "神话灵感 · 红玉麒麟",
+    trait: "稳重、守目标，适合拆解计划并一步步推进。",
+    studyStyle: "目标拆解、稳定推进",
+    iconLabel: "麟",
+    motif: "kirin",
+    palette: { shell: "#ffe4e6", accent: "#be123c", body: "#fb7185", glow: "#fff1f2", ink: "#5b1020" },
+  },
+  {
+    id: "violet_fox",
+    category: "myth",
+    name: "紫曜狐蛋",
+    petName: "紫曜灵狐",
+    adultName: "紫曜狐仙",
+    archetype: "神话灵感 · 紫曜灵狐",
+    trait: "安静、敏锐，适合阅读理解和夜间复盘。",
+    studyStyle: "阅读理解、夜间复盘",
+    iconLabel: "狐",
+    motif: "fox",
+    palette: { shell: "#f3e8ff", accent: "#7e22ce", body: "#c084fc", glow: "#faf5ff", ink: "#3b1764" },
   },
   {
     id: "lotusguard",

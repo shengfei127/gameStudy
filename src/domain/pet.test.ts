@@ -34,6 +34,9 @@ describe("pet study growth rules", () => {
       "zodiac_dog",
       "zodiac_pig",
       "windfire",
+      "crimson_phoenix",
+      "ruby_kirin",
+      "violet_fox",
     ];
 
     expect(EGG_OPTIONS.length).toBeGreaterThanOrEqual(16);
